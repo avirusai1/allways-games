@@ -47,6 +47,7 @@ const List<GameCatalogEntry> gameCatalog = [
     displayName: 'Honeycomb',
     tagline: 'Find words from 7 letters',
     icon: Icons.change_history_rounded,
+    enabled: true,
   ),
   GameCatalogEntry(
     id: 'tile_match',
