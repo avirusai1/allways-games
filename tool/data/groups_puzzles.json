@@ -1,0 +1,3044 @@
+{
+  "_comment": [
+    "Authored source content for the Groups game. Original work: every",
+    "category and word list here was written for this app. Nothing is",
+    "transcribed from any published puzzle.",
+    "",
+    "Format. Each puzzle has exactly four categories; each category has a",
+    "'tag' (machine key), a 'name' (what the player is shown), a",
+    "'difficulty' 0-3 (0 most obvious, used once each per puzzle), and a",
+    "'words' map of WORD -> extra plausible tags.",
+    "",
+    "The extra-tag list is the ambiguity guard. tool/gen_groups_bank.dart",
+    "adds each word's own category tag automatically, then refuses any",
+    "puzzle where a word's tags touch a second category in that same",
+    "puzzle. Declare a sense whenever a word could honestly be filed",
+    "somewhere else - that is what makes the check worth running."
+  ],
+  "puzzles": [
+    {
+      "id": "kitchen-shapes",
+      "categories": [
+        {
+          "tag": "pasta",
+          "name": "Pasta shapes",
+          "difficulty": 0,
+          "words": {
+            "PENNE": [],
+            "FUSILLI": [],
+            "RIGATONI": [],
+            "ORZO": []
+          }
+        },
+        {
+          "tag": "herbs",
+          "name": "Kitchen herbs",
+          "difficulty": 1,
+          "words": {
+            "THYME": [],
+            "OREGANO": [],
+            "TARRAGON": [],
+            "CHERVIL": []
+          }
+        },
+        {
+          "tag": "knife-cuts",
+          "name": "Knife cuts",
+          "difficulty": 2,
+          "words": {
+            "JULIENNE": [],
+            "CHIFFONADE": [],
+            "BRUNOISE": [],
+            "BATONNET": []
+          }
+        },
+        {
+          "tag": "add-ade",
+          "name": "___ + ADE",
+          "difficulty": 3,
+          "words": {
+            "LEMON": [
+              "fruit"
+            ],
+            "MARMAL": [],
+            "BLOCK": [],
+            "CRUS": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "board-and-piece",
+      "categories": [
+        {
+          "tag": "chess-pieces",
+          "name": "Chess pieces",
+          "difficulty": 0,
+          "words": {
+            "ROOK": [
+              "birds"
+            ],
+            "BISHOP": [],
+            "KNIGHT": [],
+            "PAWN": []
+          }
+        },
+        {
+          "tag": "greek-letters",
+          "name": "Greek letters",
+          "difficulty": 1,
+          "words": {
+            "SIGMA": [],
+            "THETA": [],
+            "LAMBDA": [],
+            "UPSILON": []
+          }
+        },
+        {
+          "tag": "card-games",
+          "name": "Card games",
+          "difficulty": 2,
+          "words": {
+            "CANASTA": [],
+            "EUCHRE": [],
+            "PINOCHLE": [],
+            "CRIBBAGE": []
+          }
+        },
+        {
+          "tag": "add-board",
+          "name": "___ + BOARD",
+          "difficulty": 3,
+          "words": {
+            "SURF": [],
+            "SKATE": [],
+            "DASH": [],
+            "SCORE": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "sky-and-sea",
+      "categories": [
+        {
+          "tag": "clouds",
+          "name": "Cloud types",
+          "difficulty": 0,
+          "words": {
+            "CIRRUS": [],
+            "CUMULUS": [],
+            "STRATUS": [],
+            "NIMBUS": []
+          }
+        },
+        {
+          "tag": "sailing",
+          "name": "Parts of a sailboat",
+          "difficulty": 1,
+          "words": {
+            "KEEL": [],
+            "TILLER": [],
+            "BOOM": [],
+            "TRANSOM": []
+          }
+        },
+        {
+          "tag": "knots",
+          "name": "Knots",
+          "difficulty": 2,
+          "words": {
+            "BOWLINE": [],
+            "CLOVE": [
+              "spices"
+            ],
+            "PRUSIK": [],
+            "SHEEPSHANK": []
+          }
+        },
+        {
+          "tag": "falling-water",
+          "name": "Kinds of falling water",
+          "difficulty": 3,
+          "words": {
+            "SLEET": [],
+            "DRIZZLE": [],
+            "HAIL": [],
+            "SPRAY": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "anatomy-lesson",
+      "categories": [
+        {
+          "tag": "bones",
+          "name": "Bones",
+          "difficulty": 0,
+          "words": {
+            "FEMUR": [],
+            "SCAPULA": [],
+            "CLAVICLE": [],
+            "STERNUM": []
+          }
+        },
+        {
+          "tag": "big-cats",
+          "name": "Big cats",
+          "difficulty": 1,
+          "words": {
+            "JAGUAR": [
+              "cars"
+            ],
+            "OCELOT": [],
+            "CARACAL": [],
+            "SERVAL": []
+          }
+        },
+        {
+          "tag": "hidden-body-part",
+          "name": "Words hiding a body part",
+          "difficulty": 2,
+          "words": {
+            "SHINE": [],
+            "BRIBE": [],
+            "FLIPPER": [],
+            "SCARLET": [
+              "colours"
+            ]
+          }
+        },
+        {
+          "tag": "muscle-slang",
+          "name": "Informal words for strength",
+          "difficulty": 3,
+          "words": {
+            "BRAWN": [],
+            "MIGHT": [],
+            "SINEW": [],
+            "HEFT": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "coffee-run",
+      "categories": [
+        {
+          "tag": "coffee",
+          "name": "Coffee drinks",
+          "difficulty": 0,
+          "words": {
+            "CORTADO": [],
+            "MACCHIATO": [],
+            "AMERICANO": [],
+            "FLATWHITE": []
+          }
+        },
+        {
+          "tag": "milk",
+          "name": "Dairy products",
+          "difficulty": 1,
+          "words": {
+            "KEFIR": [],
+            "QUARK": [
+              "physics"
+            ],
+            "CURD": [],
+            "WHEY": []
+          }
+        },
+        {
+          "tag": "roasts",
+          "name": "Degrees of roast",
+          "difficulty": 2,
+          "words": {
+            "BLONDE": [],
+            "MEDIUM": [],
+            "FRENCH": [],
+            "ITALIAN": []
+          }
+        },
+        {
+          "tag": "add-shop",
+          "name": "___ + SHOP",
+          "difficulty": 3,
+          "words": {
+            "WORK": [],
+            "PAWN": [],
+            "BOOK": [],
+            "SWEAT": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "small-print",
+      "categories": [
+        {
+          "tag": "typography",
+          "name": "Typography terms",
+          "difficulty": 0,
+          "words": {
+            "KERNING": [],
+            "SERIF": [],
+            "LEADING": [],
+            "LIGATURE": []
+          }
+        },
+        {
+          "tag": "paper-sizes",
+          "name": "Paper and type measures",
+          "difficulty": 1,
+          "words": {
+            "PICA": [],
+            "FOLIO": [],
+            "QUARTO": [],
+            "EM": []
+          }
+        },
+        {
+          "tag": "punctuation",
+          "name": "Punctuation marks",
+          "difficulty": 2,
+          "words": {
+            "COLON": [
+              "anatomy-other"
+            ],
+            "CARET": [],
+            "PILCROW": [],
+            "OBELUS": []
+          }
+        },
+        {
+          "tag": "add-mark",
+          "name": "___ + MARK",
+          "difficulty": 3,
+          "words": {
+            "BENCH": [],
+            "BOOK": [],
+            "TRADE": [],
+            "BIRTH": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "on-the-piste",
+      "categories": [
+        {
+          "tag": "fencing",
+          "name": "Fencing terms",
+          "difficulty": 0,
+          "words": {
+            "RIPOSTE": [],
+            "PARRY": [],
+            "LUNGE": [],
+            "FLECHE": []
+          }
+        },
+        {
+          "tag": "ski-events",
+          "name": "Alpine ski events",
+          "difficulty": 1,
+          "words": {
+            "SLALOM": [],
+            "DOWNHILL": [],
+            "SUPERG": [],
+            "COMBINED": []
+          }
+        },
+        {
+          "tag": "archery",
+          "name": "Archery equipment",
+          "difficulty": 2,
+          "words": {
+            "QUIVER": [],
+            "NOCK": [],
+            "FLETCHING": [],
+            "BRACER": []
+          }
+        },
+        {
+          "tag": "medals",
+          "name": "Podium metals",
+          "difficulty": 3,
+          "words": {
+            "GOLD": [
+              "colours"
+            ],
+            "SILVER": [
+              "colours"
+            ],
+            "BRONZE": [
+              "colours"
+            ],
+            "PEWTER": [
+              "colours"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "money-talks",
+      "categories": [
+        {
+          "tag": "currencies",
+          "name": "World currencies",
+          "difficulty": 0,
+          "words": {
+            "DINAR": [],
+            "KRONA": [],
+            "RUPIAH": [],
+            "FORINT": []
+          }
+        },
+        {
+          "tag": "taxes",
+          "name": "Kinds of levy",
+          "difficulty": 1,
+          "words": {
+            "TARIFF": [],
+            "TITHE": [],
+            "EXCISE": [],
+            "TOLL": []
+          }
+        },
+        {
+          "tag": "accounting",
+          "name": "Accounting terms",
+          "difficulty": 2,
+          "words": {
+            "ACCRUAL": [],
+            "LEDGER": [],
+            "AUDIT": [],
+            "GOODWILL": []
+          }
+        },
+        {
+          "tag": "add-note",
+          "name": "___ + NOTE",
+          "difficulty": 3,
+          "words": {
+            "KEY": [
+              "music-parts"
+            ],
+            "FOOT": [],
+            "BANK": [],
+            "PROMISSORY": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "string-section",
+      "categories": [
+        {
+          "tag": "guitar-parts",
+          "name": "Parts of a guitar",
+          "difficulty": 0,
+          "words": {
+            "FRET": [],
+            "NUT": [
+              "food-nuts"
+            ],
+            "SOUNDHOLE": [],
+            "TRUSSROD": []
+          }
+        },
+        {
+          "tag": "bowed",
+          "name": "Bowed instruments",
+          "difficulty": 1,
+          "words": {
+            "VIOLA": [],
+            "CELLO": [],
+            "REBEC": [],
+            "ERHU": []
+          }
+        },
+        {
+          "tag": "tempo",
+          "name": "Tempo markings",
+          "difficulty": 2,
+          "words": {
+            "LARGO": [],
+            "ANDANTE": [],
+            "PRESTO": [],
+            "GRAVE": []
+          }
+        },
+        {
+          "tag": "add-string",
+          "name": "___ + STRING",
+          "difficulty": 3,
+          "words": {
+            "HAM": [],
+            "DRAW": [],
+            "SHOE": [],
+            "HEART": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "garden-path",
+      "categories": [
+        {
+          "tag": "trees",
+          "name": "British trees",
+          "difficulty": 0,
+          "words": {
+            "ROWAN": [],
+            "ALDER": [],
+            "HORNBEAM": [],
+            "BLACKTHORN": []
+          }
+        },
+        {
+          "tag": "soil",
+          "name": "Soil types",
+          "difficulty": 1,
+          "words": {
+            "LOAM": [],
+            "CHALK": [],
+            "SILT": [],
+            "PEAT": []
+          }
+        },
+        {
+          "tag": "garden-tools",
+          "name": "Garden tools",
+          "difficulty": 2,
+          "words": {
+            "DIBBER": [],
+            "TROWEL": [],
+            "SECATEURS": [],
+            "HOE": []
+          }
+        },
+        {
+          "tag": "add-bed",
+          "name": "___ + BED",
+          "difficulty": 3,
+          "words": {
+            "SEA": [],
+            "RIVER": [],
+            "SICK": [],
+            "SUN": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "cold-open",
+      "categories": [
+        {
+          "tag": "ice-features",
+          "name": "Glacier features",
+          "difficulty": 0,
+          "words": {
+            "CREVASSE": [],
+            "MORAINE": [],
+            "SERAC": [],
+            "CIRQUE": []
+          }
+        },
+        {
+          "tag": "arctic-animals",
+          "name": "Arctic animals",
+          "difficulty": 1,
+          "words": {
+            "NARWHAL": [],
+            "PTARMIGAN": [],
+            "LEMMING": [],
+            "WALRUS": []
+          }
+        },
+        {
+          "tag": "cold-adjectives",
+          "name": "Bitterly cold",
+          "difficulty": 2,
+          "words": {
+            "GELID": [],
+            "FRIGID": [],
+            "GLACIAL": [],
+            "ARCTIC": []
+          }
+        },
+        {
+          "tag": "add-cap",
+          "name": "___ + CAP",
+          "difficulty": 3,
+          "words": {
+            "KNEE": [],
+            "NIGHT": [],
+            "HUB": [],
+            "MADE": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "desert-crossing",
+      "categories": [
+        {
+          "tag": "dunes",
+          "name": "Dune shapes",
+          "difficulty": 0,
+          "words": {
+            "BARCHAN": [],
+            "SEIF": [],
+            "STAR": [
+              "shapes"
+            ],
+            "PARABOLIC": []
+          }
+        },
+        {
+          "tag": "desert-plants",
+          "name": "Desert plants",
+          "difficulty": 1,
+          "words": {
+            "SAGUARO": [],
+            "OCOTILLO": [],
+            "YUCCA": [],
+            "MESQUITE": []
+          }
+        },
+        {
+          "tag": "mirage",
+          "name": "Optical effects",
+          "difficulty": 2,
+          "words": {
+            "MIRAGE": [],
+            "HALO": [],
+            "GLORY": [],
+            "SUNDOG": []
+          }
+        },
+        {
+          "tag": "add-storm",
+          "name": "___ + STORM",
+          "difficulty": 3,
+          "words": {
+            "SAND": [],
+            "BRAIN": [],
+            "FIRE": [],
+            "HAIL": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "night-shift",
+      "categories": [
+        {
+          "tag": "owls",
+          "name": "Owls",
+          "difficulty": 0,
+          "words": {
+            "TAWNY": [],
+            "BARN": [],
+            "SCOPS": [],
+            "SNOWY": []
+          }
+        },
+        {
+          "tag": "moths",
+          "name": "Moths",
+          "difficulty": 1,
+          "words": {
+            "LUNA": [],
+            "TIGER": [
+              "big-cats-other"
+            ],
+            "HAWKMOTH": [],
+            "CINNABAR": []
+          }
+        },
+        {
+          "tag": "sleep-stages",
+          "name": "Sleep and dream terms",
+          "difficulty": 2,
+          "words": {
+            "REM": [],
+            "LUCID": [],
+            "HYPNAGOGIC": [],
+            "CIRCADIAN": []
+          }
+        },
+        {
+          "tag": "add-fall",
+          "name": "___ + FALL",
+          "difficulty": 3,
+          "words": {
+            "WATER": [],
+            "PRAT": [],
+            "WIND": [],
+            "SHORT": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "market-day",
+      "categories": [
+        {
+          "tag": "apples",
+          "name": "Apple varieties",
+          "difficulty": 0,
+          "words": {
+            "BRAEBURN": [],
+            "RUSSET": [
+              "colours-other"
+            ],
+            "PIPPIN": [],
+            "DISCOVERY": []
+          }
+        },
+        {
+          "tag": "cheeses",
+          "name": "Cheeses",
+          "difficulty": 1,
+          "words": {
+            "COMTE": [],
+            "MANCHEGO": [],
+            "TALEGGIO": [],
+            "WENSLEYDALE": []
+          }
+        },
+        {
+          "tag": "market-measures",
+          "name": "Old units of weight",
+          "difficulty": 2,
+          "words": {
+            "DRAM": [],
+            "SCRUPLE": [],
+            "STONE": [],
+            "GRAIN": []
+          }
+        },
+        {
+          "tag": "add-stall",
+          "name": "Bargaining words",
+          "difficulty": 3,
+          "words": {
+            "HAGGLE": [],
+            "BARTER": [],
+            "DICKER": [],
+            "CHAFFER": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "engine-room",
+      "categories": [
+        {
+          "tag": "engine-parts",
+          "name": "Engine parts",
+          "difficulty": 0,
+          "words": {
+            "PISTON": [],
+            "CRANKSHAFT": [],
+            "MANIFOLD": [],
+            "TAPPET": []
+          }
+        },
+        {
+          "tag": "tools",
+          "name": "Spanner types",
+          "difficulty": 1,
+          "words": {
+            "TORQUE": [],
+            "RATCHET": [],
+            "ALLEN": [],
+            "MONKEY": [
+              "primates"
+            ]
+          }
+        },
+        {
+          "tag": "fuels",
+          "name": "Fuels",
+          "difficulty": 2,
+          "words": {
+            "DIESEL": [],
+            "KEROSENE": [],
+            "PROPANE": [],
+            "ANTHRACITE": []
+          }
+        },
+        {
+          "tag": "add-shaft",
+          "name": "___ + SHAFT",
+          "difficulty": 3,
+          "words": {
+            "MINE": [],
+            "DRIVE": [],
+            "LIFT": [],
+            "UP": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "paper-trail",
+      "categories": [
+        {
+          "tag": "documents",
+          "name": "Legal documents",
+          "difficulty": 0,
+          "words": {
+            "DEED": [],
+            "WRIT": [],
+            "CODICIL": [],
+            "AFFIDAVIT": []
+          }
+        },
+        {
+          "tag": "handwriting",
+          "name": "Handwriting styles",
+          "difficulty": 1,
+          "words": {
+            "CURSIVE": [],
+            "COPPERPLATE": [],
+            "ITALIC": [],
+            "UNCIAL": []
+          }
+        },
+        {
+          "tag": "bookbinding",
+          "name": "Bookbinding parts",
+          "difficulty": 2,
+          "words": {
+            "SPINE": [
+              "anatomy-other"
+            ],
+            "ENDPAPER": [],
+            "HEADBAND": [],
+            "SIGNATURE": []
+          }
+        },
+        {
+          "tag": "add-print",
+          "name": "___ + PRINT",
+          "difficulty": 3,
+          "words": {
+            "FOOT": [],
+            "BLUE": [
+              "colours"
+            ],
+            "FINGER": [],
+            "PRE": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "field-guide",
+      "categories": [
+        {
+          "tag": "corvids",
+          "name": "Crow family",
+          "difficulty": 0,
+          "words": {
+            "JACKDAW": [],
+            "CHOUGH": [],
+            "MAGPIE": [],
+            "JAY": []
+          }
+        },
+        {
+          "tag": "deer",
+          "name": "Deer",
+          "difficulty": 1,
+          "words": {
+            "ROE": [
+              "fish-eggs"
+            ],
+            "FALLOW": [
+              "farming"
+            ],
+            "MUNTJAC": [],
+            "SIKA": []
+          }
+        },
+        {
+          "tag": "animal-groups",
+          "name": "Collective nouns",
+          "difficulty": 2,
+          "words": {
+            "MURDER": [],
+            "PARLIAMENT": [],
+            "SKULK": [],
+            "EXALTATION": []
+          }
+        },
+        {
+          "tag": "tracks",
+          "name": "Animal signs a tracker reads",
+          "difficulty": 3,
+          "words": {
+            "SPOOR": [],
+            "SLOT": [],
+            "SCAT": [],
+            "MIDDEN": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "stage-directions",
+      "categories": [
+        {
+          "tag": "theatre-areas",
+          "name": "Parts of a theatre",
+          "difficulty": 0,
+          "words": {
+            "WINGS": [],
+            "STALLS": [],
+            "GALLERY": [],
+            "APRON": []
+          }
+        },
+        {
+          "tag": "lighting",
+          "name": "Stage lighting",
+          "difficulty": 1,
+          "words": {
+            "GOBO": [],
+            "FRESNEL": [],
+            "BARNDOOR": [],
+            "GEL": []
+          }
+        },
+        {
+          "tag": "verse",
+          "name": "Metrical feet",
+          "difficulty": 2,
+          "words": {
+            "IAMB": [],
+            "TROCHEE": [],
+            "ANAPEST": [],
+            "SPONDEE": []
+          }
+        },
+        {
+          "tag": "add-light",
+          "name": "___ + LIGHT",
+          "difficulty": 3,
+          "words": {
+            "SPOT": [],
+            "LIME": [
+              "fruit"
+            ],
+            "MOON": [],
+            "HIGH": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "weights-and-measures",
+      "categories": [
+        {
+          "tag": "si-prefixes",
+          "name": "SI prefixes",
+          "difficulty": 0,
+          "words": {
+            "NANO": [],
+            "TERA": [],
+            "PICO": [],
+            "EXA": []
+          }
+        },
+        {
+          "tag": "angles",
+          "name": "Angle words",
+          "difficulty": 1,
+          "words": {
+            "OBTUSE": [],
+            "REFLEX": [],
+            "ACUTE": [],
+            "SUPPLEMENTARY": []
+          }
+        },
+        {
+          "tag": "nautical-measures",
+          "name": "Nautical measures",
+          "difficulty": 2,
+          "words": {
+            "FATHOM": [],
+            "KNOT": [],
+            "CABLE": [],
+            "LEAGUE": []
+          }
+        },
+        {
+          "tag": "add-rule",
+          "name": "___ + RULE",
+          "difficulty": 3,
+          "words": {
+            "SLIDE": [],
+            "HOME": [],
+            "GROUND": [],
+            "OVER": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "dye-works",
+      "categories": [
+        {
+          "tag": "natural-dyes",
+          "name": "Natural dyes",
+          "difficulty": 0,
+          "words": {
+            "WOAD": [],
+            "MADDER": [],
+            "COCHINEAL": [],
+            "INDIGO": [
+              "colours"
+            ]
+          }
+        },
+        {
+          "tag": "weaves",
+          "name": "Fabric weaves",
+          "difficulty": 1,
+          "words": {
+            "TWILL": [],
+            "HERRINGBONE": [],
+            "SATEEN": [],
+            "PERCALE": []
+          }
+        },
+        {
+          "tag": "stitches",
+          "name": "Embroidery stitches",
+          "difficulty": 2,
+          "words": {
+            "CHAIN": [],
+            "FRENCHKNOT": [],
+            "SATIN": [],
+            "BLANKET": []
+          }
+        },
+        {
+          "tag": "add-cloth",
+          "name": "___ + CLOTH",
+          "difficulty": 3,
+          "words": {
+            "DISH": [],
+            "LOIN": [],
+            "SACK": [],
+            "OIL": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "ancient-history",
+      "categories": [
+        {
+          "tag": "roman-roles",
+          "name": "Roman public offices",
+          "difficulty": 0,
+          "words": {
+            "CONSUL": [],
+            "TRIBUNE": [],
+            "QUAESTOR": [],
+            "AEDILE": []
+          }
+        },
+        {
+          "tag": "egypt",
+          "name": "Ancient Egyptian things",
+          "difficulty": 1,
+          "words": {
+            "ANKH": [],
+            "SHABTI": [],
+            "CARTOUCHE": [],
+            "SCARAB": []
+          }
+        },
+        {
+          "tag": "writing-systems",
+          "name": "Ancient scripts",
+          "difficulty": 2,
+          "words": {
+            "CUNEIFORM": [],
+            "LINEARB": [],
+            "OGHAM": [],
+            "DEMOTIC": []
+          }
+        },
+        {
+          "tag": "add-age",
+          "name": "___ + AGE",
+          "difficulty": 3,
+          "words": {
+            "CARRI": [],
+            "POST": [],
+            "CORK": [],
+            "PLUM": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "under-the-hood",
+      "categories": [
+        {
+          "tag": "programming-langs",
+          "name": "Programming languages",
+          "difficulty": 0,
+          "words": {
+            "RUST": [
+              "corrosion"
+            ],
+            "SWIFT": [
+              "birds"
+            ],
+            "ELIXIR": [],
+            "SCALA": []
+          }
+        },
+        {
+          "tag": "data-structures",
+          "name": "Data structures",
+          "difficulty": 1,
+          "words": {
+            "TRIE": [],
+            "HEAP": [],
+            "DEQUE": [],
+            "TREAP": []
+          }
+        },
+        {
+          "tag": "sorting",
+          "name": "Sorting algorithms",
+          "difficulty": 2,
+          "words": {
+            "QUICKSORT": [],
+            "RADIX": [],
+            "SHELLSORT": [],
+            "TIMSORT": []
+          }
+        },
+        {
+          "tag": "add-ware",
+          "name": "___ + WARE",
+          "difficulty": 3,
+          "words": {
+            "SOFT": [],
+            "TUPPER": [],
+            "SILVER": [],
+            "FIRM": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "pub-quiz",
+      "categories": [
+        {
+          "tag": "darts",
+          "name": "Darts terms",
+          "difficulty": 0,
+          "words": {
+            "OCHE": [],
+            "TON": [],
+            "BULL": [
+              "cattle"
+            ],
+            "CHECKOUT": []
+          }
+        },
+        {
+          "tag": "beer-styles",
+          "name": "Beer styles",
+          "difficulty": 1,
+          "words": {
+            "PORTER": [
+              "jobs"
+            ],
+            "SAISON": [],
+            "GOSE": [],
+            "DUNKEL": []
+          }
+        },
+        {
+          "tag": "snooker",
+          "name": "Snooker terms",
+          "difficulty": 2,
+          "words": {
+            "BAULK": [],
+            "SNOOKER": [],
+            "PLANT": [],
+            "SCREW": []
+          }
+        },
+        {
+          "tag": "add-pot",
+          "name": "___ + POT",
+          "difficulty": 3,
+          "words": {
+            "JACK": [],
+            "TEA": [],
+            "CRACK": [],
+            "STOCK": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "long-haul",
+      "categories": [
+        {
+          "tag": "aviation",
+          "name": "Parts of an aircraft",
+          "difficulty": 0,
+          "words": {
+            "AILERON": [],
+            "EMPENNAGE": [],
+            "SPOILER": [],
+            "NACELLE": []
+          }
+        },
+        {
+          "tag": "airport-roles",
+          "name": "Airport jobs",
+          "difficulty": 1,
+          "words": {
+            "MARSHALLER": [],
+            "DISPATCHER": [],
+            "LOADMASTER": [],
+            "RAMPAGENT": []
+          }
+        },
+        {
+          "tag": "clouds-flight",
+          "name": "Flight instruments",
+          "difficulty": 2,
+          "words": {
+            "ALTIMETER": [],
+            "TRANSPONDER": [],
+            "VARIOMETER": [],
+            "PITOT": []
+          }
+        },
+        {
+          "tag": "add-port",
+          "name": "___ + PORT",
+          "difficulty": 3,
+          "words": {
+            "AIR": [],
+            "PASS": [],
+            "TRANS": [],
+            "CAR": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "rocks-and-fossils",
+      "categories": [
+        {
+          "tag": "igneous",
+          "name": "Igneous rocks",
+          "difficulty": 0,
+          "words": {
+            "BASALT": [],
+            "GABBRO": [],
+            "OBSIDIAN": [],
+            "PUMICE": []
+          }
+        },
+        {
+          "tag": "fossils",
+          "name": "Common fossils",
+          "difficulty": 1,
+          "words": {
+            "AMMONITE": [],
+            "TRILOBITE": [],
+            "BELEMNITE": [],
+            "CRINOID": []
+          }
+        },
+        {
+          "tag": "eras",
+          "name": "Geological periods",
+          "difficulty": 2,
+          "words": {
+            "JURASSIC": [],
+            "DEVONIAN": [],
+            "PERMIAN": [],
+            "CAMBRIAN": []
+          }
+        },
+        {
+          "tag": "add-stone",
+          "name": "___ + STONE",
+          "difficulty": 3,
+          "words": {
+            "LIME": [
+              "fruit"
+            ],
+            "MILE": [],
+            "KEY": [],
+            "BRIM": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "high-street",
+      "categories": [
+        {
+          "tag": "shop-types",
+          "name": "Old shop names",
+          "difficulty": 0,
+          "words": {
+            "HABERDASHER": [],
+            "IRONMONGER": [],
+            "FISHMONGER": [],
+            "COSTERMONGER": []
+          }
+        },
+        {
+          "tag": "hats",
+          "name": "Hats",
+          "difficulty": 1,
+          "words": {
+            "HOMBURG": [],
+            "TRILBY": [],
+            "CLOCHE": [],
+            "BOATER": []
+          }
+        },
+        {
+          "tag": "shoes",
+          "name": "Shoe styles",
+          "difficulty": 2,
+          "words": {
+            "BROGUE": [
+              "accents"
+            ],
+            "OXFORD": [],
+            "LOAFER": [],
+            "DERBY": []
+          }
+        },
+        {
+          "tag": "add-front",
+          "name": "___ + FRONT",
+          "difficulty": 3,
+          "words": {
+            "SHOP": [],
+            "SEA": [],
+            "WATER": [],
+            "UP": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "sound-check",
+      "categories": [
+        {
+          "tag": "studio-gear",
+          "name": "Recording studio gear",
+          "difficulty": 0,
+          "words": {
+            "COMPRESSOR": [],
+            "PREAMP": [],
+            "POPFILTER": [],
+            "PATCHBAY": []
+          }
+        },
+        {
+          "tag": "mic-patterns",
+          "name": "Microphone patterns",
+          "difficulty": 1,
+          "words": {
+            "CARDIOID": [],
+            "OMNI": [],
+            "SHOTGUN": [],
+            "FIGUREEIGHT": []
+          }
+        },
+        {
+          "tag": "acoustics",
+          "name": "Acoustics terms",
+          "difficulty": 2,
+          "words": {
+            "REVERB": [],
+            "FLUTTER": [],
+            "DIFFUSION": [],
+            "STANDINGWAVE": []
+          }
+        },
+        {
+          "tag": "add-track",
+          "name": "___ + TRACK",
+          "difficulty": 3,
+          "words": {
+            "SOUND": [],
+            "RACE": [],
+            "FAST": [],
+            "BACK": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "kitchen-chemistry",
+      "categories": [
+        {
+          "tag": "leaveners",
+          "name": "Raising agents",
+          "difficulty": 0,
+          "words": {
+            "YEAST": [],
+            "BICARB": [],
+            "BAKINGPOWDER": [],
+            "SOURDOUGH": []
+          }
+        },
+        {
+          "tag": "emulsions",
+          "name": "Emulsions and sauces",
+          "difficulty": 1,
+          "words": {
+            "AIOLI": [],
+            "HOLLANDAISE": [],
+            "REMOULADE": [],
+            "VELOUTE": []
+          }
+        },
+        {
+          "tag": "preserving",
+          "name": "Preserving methods",
+          "difficulty": 2,
+          "words": {
+            "CURING": [],
+            "PICKLING": [],
+            "CONFIT": [],
+            "SMOKING": []
+          }
+        },
+        {
+          "tag": "add-cake",
+          "name": "___ + CAKE",
+          "difficulty": 3,
+          "words": {
+            "PAN": [],
+            "FISH": [],
+            "CUP": [],
+            "OAT": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "postal-order",
+      "categories": [
+        {
+          "tag": "philately",
+          "name": "Stamp-collecting terms",
+          "difficulty": 0,
+          "words": {
+            "PERFORATION": [],
+            "GUTTER": [],
+            "CACHET": [],
+            "SEETENANT": []
+          }
+        },
+        {
+          "tag": "letters",
+          "name": "Parts of a letter",
+          "difficulty": 1,
+          "words": {
+            "SALUTATION": [],
+            "POSTSCRIPT": [],
+            "ENCLOSURE": [],
+            "LETTERHEAD": []
+          }
+        },
+        {
+          "tag": "delivery",
+          "name": "Ways to send something",
+          "difficulty": 2,
+          "words": {
+            "COURIER": [],
+            "RECORDED": [],
+            "POSTE": [],
+            "FRANKED": []
+          }
+        },
+        {
+          "tag": "add-box",
+          "name": "___ + BOX",
+          "difficulty": 3,
+          "words": {
+            "POST": [],
+            "SAND": [],
+            "CHATTER": [],
+            "SOAP": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "sleight-of-hand",
+      "categories": [
+        {
+          "tag": "magic-terms",
+          "name": "Stage magic terms",
+          "difficulty": 0,
+          "words": {
+            "MISDIRECTION": [],
+            "PALMING": [],
+            "FORCE": [],
+            "PRESTIDIGITATION": []
+          }
+        },
+        {
+          "tag": "juggling",
+          "name": "Juggling patterns",
+          "difficulty": 1,
+          "words": {
+            "CASCADE": [],
+            "MILLSMESS": [],
+            "SHOWER": [],
+            "FOUNTAIN": []
+          }
+        },
+        {
+          "tag": "circus",
+          "name": "Circus performers",
+          "difficulty": 2,
+          "words": {
+            "AERIALIST": [],
+            "CONTORTIONIST": [],
+            "RINGMASTER": [],
+            "FUNAMBULIST": []
+          }
+        },
+        {
+          "tag": "add-trick",
+          "name": "Words for a swindle",
+          "difficulty": 3,
+          "words": {
+            "CON": [],
+            "GRIFT": [],
+            "HUSTLE": [],
+            "SCAM": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "tide-line",
+      "categories": [
+        {
+          "tag": "shells",
+          "name": "Seashells",
+          "difficulty": 0,
+          "words": {
+            "COWRIE": [],
+            "WHELK": [],
+            "LIMPET": [],
+            "AUGER": [
+              "tools-other"
+            ]
+          }
+        },
+        {
+          "tag": "seaweed",
+          "name": "Seaweeds",
+          "difficulty": 1,
+          "words": {
+            "KELP": [],
+            "DULSE": [],
+            "WRACK": [],
+            "LAVER": []
+          }
+        },
+        {
+          "tag": "coastal-features",
+          "name": "Coastal landforms",
+          "difficulty": 2,
+          "words": {
+            "SPIT": [],
+            "TOMBOLO": [],
+            "STACK": [],
+            "MACHAIR": []
+          }
+        },
+        {
+          "tag": "add-shore",
+          "name": "___ + SHORE",
+          "difficulty": 3,
+          "words": {
+            "OFF": [],
+            "FORE": [],
+            "ON": [],
+            "LAKE": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "well-versed",
+      "categories": [
+        {
+          "tag": "poem-forms",
+          "name": "Poetic forms",
+          "difficulty": 0,
+          "words": {
+            "VILLANELLE": [],
+            "SESTINA": [],
+            "GHAZAL": [],
+            "TRIOLET": []
+          }
+        },
+        {
+          "tag": "rhetoric",
+          "name": "Rhetorical figures",
+          "difficulty": 1,
+          "words": {
+            "CHIASMUS": [],
+            "ZEUGMA": [],
+            "LITOTES": [],
+            "ANAPHORA": []
+          }
+        },
+        {
+          "tag": "narrative",
+          "name": "Narrative devices",
+          "difficulty": 2,
+          "words": {
+            "FLASHBACK": [],
+            "FRAMESTORY": [],
+            "UNRELIABLE": [],
+            "INMEDIASRES": []
+          }
+        },
+        {
+          "tag": "add-line",
+          "name": "___ + LINE",
+          "difficulty": 3,
+          "words": {
+            "HEAD": [],
+            "DEAD": [],
+            "PIPE": [],
+            "OUT": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "cabinet-making",
+      "categories": [
+        {
+          "tag": "joints",
+          "name": "Woodworking joints",
+          "difficulty": 0,
+          "words": {
+            "DOVETAIL": [],
+            "MORTISE": [],
+            "RABBET": [],
+            "BISCUIT": [
+              "baking-other"
+            ]
+          }
+        },
+        {
+          "tag": "planes",
+          "name": "Hand planes",
+          "difficulty": 1,
+          "words": {
+            "JOINTER": [],
+            "SMOOTHING": [],
+            "BLOCK": [],
+            "SHOULDER": [
+              "anatomy-other"
+            ]
+          }
+        },
+        {
+          "tag": "hardwoods",
+          "name": "Hardwoods",
+          "difficulty": 2,
+          "words": {
+            "WALNUT": [],
+            "SAPELE": [],
+            "IROKO": [],
+            "PADAUK": []
+          }
+        },
+        {
+          "tag": "add-work",
+          "name": "___ + WORK",
+          "difficulty": 3,
+          "words": {
+            "FRAME": [],
+            "NET": [],
+            "GROUND": [],
+            "PATCH": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "map-reading",
+      "categories": [
+        {
+          "tag": "map-features",
+          "name": "Map symbols and features",
+          "difficulty": 0,
+          "words": {
+            "CONTOUR": [],
+            "BENCHMARK": [],
+            "TRIGPOINT": [],
+            "SPOTHEIGHT": []
+          }
+        },
+        {
+          "tag": "projections",
+          "name": "Map projections",
+          "difficulty": 1,
+          "words": {
+            "MERCATOR": [],
+            "MOLLWEIDE": [],
+            "ROBINSON": [],
+            "GNOMONIC": []
+          }
+        },
+        {
+          "tag": "landforms",
+          "name": "Upland landforms",
+          "difficulty": 2,
+          "words": {
+            "TARN": [],
+            "ARETE": [],
+            "SCREE": [],
+            "COL": []
+          }
+        },
+        {
+          "tag": "add-way",
+          "name": "___ + WAY",
+          "difficulty": 3,
+          "words": {
+            "CAUSE": [],
+            "GANG": [],
+            "ARCHWAY": [],
+            "SUB": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "bee-line",
+      "categories": [
+        {
+          "tag": "beekeeping",
+          "name": "Beekeeping terms",
+          "difficulty": 0,
+          "words": {
+            "BROOD": [],
+            "SUPER": [],
+            "PROPOLIS": [],
+            "SMOKER": []
+          }
+        },
+        {
+          "tag": "honey-types",
+          "name": "Honey varieties",
+          "difficulty": 1,
+          "words": {
+            "MANUKA": [],
+            "ACACIA": [],
+            "HEATHER": [],
+            "BUCKWHEAT": []
+          }
+        },
+        {
+          "tag": "pollinators",
+          "name": "Pollinating insects",
+          "difficulty": 2,
+          "words": {
+            "HOVERFLY": [],
+            "MASONBEE": [],
+            "BUMBLEBEE": [],
+            "LEAFCUTTER": []
+          }
+        },
+        {
+          "tag": "add-comb",
+          "name": "___ + COMB",
+          "difficulty": 3,
+          "words": {
+            "HONEY": [],
+            "CURRY": [
+              "food-other"
+            ],
+            "CATA": [],
+            "COX": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "cold-case",
+      "categories": [
+        {
+          "tag": "forensics",
+          "name": "Forensic disciplines",
+          "difficulty": 0,
+          "words": {
+            "BALLISTICS": [],
+            "TOXICOLOGY": [],
+            "ODONTOLOGY": [],
+            "ENTOMOLOGY": []
+          }
+        },
+        {
+          "tag": "evidence",
+          "name": "Kinds of evidence",
+          "difficulty": 1,
+          "words": {
+            "HEARSAY": [],
+            "CIRCUMSTANTIAL": [],
+            "EXCULPATORY": [],
+            "CORROBORATING": []
+          }
+        },
+        {
+          "tag": "detective-fiction",
+          "name": "Detective-story furniture",
+          "difficulty": 2,
+          "words": {
+            "REDHERRING": [],
+            "ALIBI": [],
+            "LOCKEDROOM": [],
+            "MACGUFFIN": []
+          }
+        },
+        {
+          "tag": "add-print-two",
+          "name": "Marks left behind",
+          "difficulty": 3,
+          "words": {
+            "SMUDGE": [],
+            "IMPRESSION": [],
+            "RESIDUE": [],
+            "TRACE": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "greenhouse",
+      "categories": [
+        {
+          "tag": "orchids",
+          "name": "Orchid genera",
+          "difficulty": 0,
+          "words": {
+            "PHALAENOPSIS": [],
+            "CATTLEYA": [],
+            "DENDROBIUM": [],
+            "ONCIDIUM": []
+          }
+        },
+        {
+          "tag": "succulents",
+          "name": "Succulents",
+          "difficulty": 1,
+          "words": {
+            "ECHEVERIA": [],
+            "HAWORTHIA": [],
+            "SEDUM": [],
+            "LITHOPS": []
+          }
+        },
+        {
+          "tag": "propagation",
+          "name": "Ways to propagate a plant",
+          "difficulty": 2,
+          "words": {
+            "CUTTING": [],
+            "LAYERING": [],
+            "GRAFTING": [],
+            "DIVISION": []
+          }
+        },
+        {
+          "tag": "add-house",
+          "name": "___ + HOUSE",
+          "difficulty": 3,
+          "words": {
+            "GREEN": [
+              "colours"
+            ],
+            "LIGHT": [],
+            "WARE": [],
+            "OUT": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "signal-flags",
+      "categories": [
+        {
+          "tag": "phonetic",
+          "name": "NATO alphabet words",
+          "difficulty": 0,
+          "words": {
+            "FOXTROT": [
+              "dances"
+            ],
+            "KILO": [],
+            "QUEBEC": [],
+            "ZULU": []
+          }
+        },
+        {
+          "tag": "morse",
+          "name": "Signalling methods",
+          "difficulty": 1,
+          "words": {
+            "SEMAPHORE": [],
+            "HELIOGRAPH": [],
+            "ALDIS": [],
+            "BLINKER": []
+          }
+        },
+        {
+          "tag": "distress",
+          "name": "Distress and urgency calls",
+          "difficulty": 2,
+          "words": {
+            "MAYDAY": [],
+            "PANPAN": [],
+            "SECURITE": [],
+            "SOS": []
+          }
+        },
+        {
+          "tag": "add-code",
+          "name": "___ + CODE",
+          "difficulty": 3,
+          "words": {
+            "BAR": [],
+            "DRESS": [],
+            "POST": [],
+            "ZIP": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "grand-tour",
+      "categories": [
+        {
+          "tag": "cycling",
+          "name": "Road cycling terms",
+          "difficulty": 0,
+          "words": {
+            "PELOTON": [],
+            "DOMESTIQUE": [],
+            "ECHELON": [],
+            "BREAKAWAY": []
+          }
+        },
+        {
+          "tag": "jerseys",
+          "name": "Race classifications",
+          "difficulty": 1,
+          "words": {
+            "SPRINTER": [],
+            "CLIMBER": [],
+            "ROULEUR": [],
+            "PUNCHEUR": []
+          }
+        },
+        {
+          "tag": "bike-parts",
+          "name": "Bicycle parts",
+          "difficulty": 2,
+          "words": {
+            "DERAILLEUR": [],
+            "BOTTOMBRACKET": [],
+            "STEM": [
+              "plants-other"
+            ],
+            "CASSETTE": []
+          }
+        },
+        {
+          "tag": "add-wheel",
+          "name": "___ + WHEEL",
+          "difficulty": 3,
+          "words": {
+            "CART": [],
+            "FLY": [
+              "insects-other"
+            ],
+            "PIN": [],
+            "FERRIS": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "spice-rack",
+      "categories": [
+        {
+          "tag": "spices",
+          "name": "Whole spices",
+          "difficulty": 0,
+          "words": {
+            "CARDAMOM": [],
+            "STARANISE": [],
+            "MACE": [
+              "weapons"
+            ],
+            "FENUGREEK": []
+          }
+        },
+        {
+          "tag": "chillies",
+          "name": "Chilli varieties",
+          "difficulty": 1,
+          "words": {
+            "HABANERO": [],
+            "SERRANO": [],
+            "SCOTCHBONNET": [],
+            "PADRON": []
+          }
+        },
+        {
+          "tag": "spice-blends",
+          "name": "Spice blends",
+          "difficulty": 2,
+          "words": {
+            "GARAMMASALA": [],
+            "RASELHANOUT": [],
+            "ZAATAR": [],
+            "BERBERE": []
+          }
+        },
+        {
+          "tag": "heat-words",
+          "name": "Words for spicy heat",
+          "difficulty": 3,
+          "words": {
+            "PUNGENT": [],
+            "FIERY": [],
+            "PIQUANT": [],
+            "SEARING": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "blackboard",
+      "categories": [
+        {
+          "tag": "conic-sections",
+          "name": "Conic sections and curves",
+          "difficulty": 0,
+          "words": {
+            "PARABOLA": [],
+            "HYPERBOLA": [],
+            "ELLIPSE": [],
+            "CARDIOID": []
+          }
+        },
+        {
+          "tag": "number-types",
+          "name": "Kinds of number",
+          "difficulty": 1,
+          "words": {
+            "IRRATIONAL": [],
+            "TRANSCENDENTAL": [],
+            "COMPOSITE": [],
+            "PERFECT": []
+          }
+        },
+        {
+          "tag": "proof-words",
+          "name": "Words from a proof",
+          "difficulty": 2,
+          "words": {
+            "LEMMA": [],
+            "COROLLARY": [],
+            "CONVERSE": [
+              "shoes-other"
+            ],
+            "AXIOM": []
+          }
+        },
+        {
+          "tag": "add-set",
+          "name": "___ + SET",
+          "difficulty": 3,
+          "words": {
+            "SUN": [],
+            "OFF": [],
+            "MIND": [],
+            "TEA": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "laboratory",
+      "categories": [
+        {
+          "tag": "glassware",
+          "name": "Laboratory glassware",
+          "difficulty": 0,
+          "words": {
+            "BURETTE": [],
+            "PIPETTE": [],
+            "CRUCIBLE": [],
+            "ERLENMEYER": []
+          }
+        },
+        {
+          "tag": "noble-gases",
+          "name": "Noble gases",
+          "difficulty": 1,
+          "words": {
+            "ARGON": [],
+            "KRYPTON": [],
+            "XENON": [],
+            "RADON": []
+          }
+        },
+        {
+          "tag": "lab-processes",
+          "name": "Separation techniques",
+          "difficulty": 2,
+          "words": {
+            "CHROMATOGRAPHY": [],
+            "CENTRIFUGATION": [],
+            "DISTILLATION": [],
+            "FILTRATION": []
+          }
+        },
+        {
+          "tag": "add-tube",
+          "name": "___ + TUBE",
+          "difficulty": 3,
+          "words": {
+            "TEST": [],
+            "INNER": [],
+            "BOOB": [],
+            "CATHODE": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "castle-walls",
+      "categories": [
+        {
+          "tag": "castle-parts",
+          "name": "Parts of a castle",
+          "difficulty": 0,
+          "words": {
+            "BARBICAN": [],
+            "MACHICOLATION": [],
+            "PORTCULLIS": [],
+            "BAILEY": []
+          }
+        },
+        {
+          "tag": "armour",
+          "name": "Pieces of armour",
+          "difficulty": 1,
+          "words": {
+            "GAUNTLET": [],
+            "GREAVE": [],
+            "PAULDRON": [],
+            "VAMBRACE": []
+          }
+        },
+        {
+          "tag": "siege",
+          "name": "Siege engines",
+          "difficulty": 2,
+          "words": {
+            "TREBUCHET": [],
+            "MANGONEL": [],
+            "BALLISTA": [],
+            "BATTERINGRAM": []
+          }
+        },
+        {
+          "tag": "add-gate",
+          "name": "___ + GATE",
+          "difficulty": 3,
+          "words": {
+            "FLOOD": [],
+            "TAIL": [],
+            "COLL": [],
+            "TOLL": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "orchestra-pit",
+      "categories": [
+        {
+          "tag": "woodwind",
+          "name": "Woodwind instruments",
+          "difficulty": 0,
+          "words": {
+            "OBOE": [],
+            "BASSOON": [],
+            "PICCOLO": [],
+            "CORANGLAIS": []
+          }
+        },
+        {
+          "tag": "percussion",
+          "name": "Orchestral percussion",
+          "difficulty": 1,
+          "words": {
+            "TIMPANI": [],
+            "GLOCKENSPIEL": [],
+            "TAMTAM": [],
+            "CELESTA": []
+          }
+        },
+        {
+          "tag": "dynamics",
+          "name": "Dynamic markings",
+          "difficulty": 2,
+          "words": {
+            "FORTE": [],
+            "PIANISSIMO": [],
+            "SFORZANDO": [],
+            "MEZZO": []
+          }
+        },
+        {
+          "tag": "add-bar",
+          "name": "___ + BAR",
+          "difficulty": 3,
+          "words": {
+            "CROW": [],
+            "HANDLE": [],
+            "SAND": [],
+            "CROSS": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "printing-press",
+      "categories": [
+        {
+          "tag": "print-processes",
+          "name": "Printing processes",
+          "difficulty": 0,
+          "words": {
+            "LETTERPRESS": [],
+            "INTAGLIO": [],
+            "LITHOGRAPHY": [],
+            "SCREENPRINT": []
+          }
+        },
+        {
+          "tag": "ink-colours",
+          "name": "Process ink colours",
+          "difficulty": 1,
+          "words": {
+            "CYAN": [],
+            "MAGENTA": [],
+            "YELLOW": [],
+            "KEYBLACK": []
+          }
+        },
+        {
+          "tag": "newspaper",
+          "name": "Newspaper sections",
+          "difficulty": 2,
+          "words": {
+            "MASTHEAD": [],
+            "OBITUARIES": [],
+            "CLASSIFIEDS": [],
+            "LEADER": []
+          }
+        },
+        {
+          "tag": "add-press",
+          "name": "___ + PRESS",
+          "difficulty": 3,
+          "words": {
+            "CY": [],
+            "OP": [],
+            "EX": [],
+            "IM": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "railway-children",
+      "categories": [
+        {
+          "tag": "railway",
+          "name": "Railway infrastructure",
+          "difficulty": 0,
+          "words": {
+            "SLEEPER": [],
+            "BALLAST": [],
+            "CATENARY": [],
+            "TURNOUT": []
+          }
+        },
+        {
+          "tag": "signals",
+          "name": "Signalling equipment",
+          "difficulty": 1,
+          "words": {
+            "SEMAPHORE": [],
+            "GANTRY": [],
+            "TOKEN": [],
+            "INTERLOCKING": []
+          }
+        },
+        {
+          "tag": "carriages",
+          "name": "Kinds of railway carriage",
+          "difficulty": 2,
+          "words": {
+            "PULLMAN": [],
+            "COUCHETTE": [],
+            "BRAKEVAN": [],
+            "OBSERVATION": []
+          }
+        },
+        {
+          "tag": "add-way-two",
+          "name": "___ + LINE",
+          "difficulty": 3,
+          "words": {
+            "MAIN": [],
+            "BRANCH": [],
+            "SIDE": [],
+            "TRAM": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "cloth-and-thread",
+      "categories": [
+        {
+          "tag": "knitting",
+          "name": "Knitting terms",
+          "difficulty": 0,
+          "words": {
+            "PURL": [],
+            "GARTER": [],
+            "CABLE": [],
+            "INTARSIA": []
+          }
+        },
+        {
+          "tag": "lace",
+          "name": "Kinds of lace",
+          "difficulty": 1,
+          "words": {
+            "CHANTILLY": [],
+            "BRUSSELS": [],
+            "GUIPURE": [],
+            "TATTING": []
+          }
+        },
+        {
+          "tag": "sewing-tools",
+          "name": "Sewing kit",
+          "difficulty": 2,
+          "words": {
+            "BODKIN": [],
+            "THIMBLE": [],
+            "PINKING": [],
+            "SEAMRIPPER": []
+          }
+        },
+        {
+          "tag": "add-thread",
+          "name": "___ + THREAD",
+          "difficulty": 3,
+          "words": {
+            "SPOOL": [],
+            "HAIRS": [],
+            "SCREW": [],
+            "SHRED": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "mountain-hut",
+      "categories": [
+        {
+          "tag": "climbing-gear",
+          "name": "Climbing protection",
+          "difficulty": 0,
+          "words": {
+            "PITON": [],
+            "HEXCENTRIC": [],
+            "QUICKDRAW": [],
+            "CAMMING": []
+          }
+        },
+        {
+          "tag": "climbing-moves",
+          "name": "Climbing moves",
+          "difficulty": 1,
+          "words": {
+            "MANTEL": [],
+            "HEELHOOK": [],
+            "DYNO": [],
+            "LAYBACK": []
+          }
+        },
+        {
+          "tag": "rope-work",
+          "name": "Rope techniques",
+          "difficulty": 2,
+          "words": {
+            "BELAY": [],
+            "ABSEIL": [],
+            "PRUSIKING": [],
+            "RAPPEL": []
+          }
+        },
+        {
+          "tag": "add-hold",
+          "name": "___ + HOLD",
+          "difficulty": 3,
+          "words": {
+            "HOUSE": [],
+            "STRONG": [],
+            "THRESH": [],
+            "FOOT": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "wine-list",
+      "categories": [
+        {
+          "tag": "grapes",
+          "name": "Wine grapes",
+          "difficulty": 0,
+          "words": {
+            "NEBBIOLO": [],
+            "TEMPRANILLO": [],
+            "GRENACHE": [],
+            "VIOGNIER": []
+          }
+        },
+        {
+          "tag": "wine-faults",
+          "name": "Wine faults",
+          "difficulty": 1,
+          "words": {
+            "CORKED": [],
+            "MADERISED": [],
+            "VOLATILE": [],
+            "REDUCED": []
+          }
+        },
+        {
+          "tag": "bottle-sizes",
+          "name": "Large bottle sizes",
+          "difficulty": 2,
+          "words": {
+            "MAGNUM": [],
+            "JEROBOAM": [],
+            "METHUSELAH": [],
+            "SALMANAZAR": []
+          }
+        },
+        {
+          "tag": "add-glass",
+          "name": "___ + GLASS",
+          "difficulty": 3,
+          "words": {
+            "HOUR": [],
+            "SPY": [],
+            "PLEXI": [],
+            "SEA": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "weather-station",
+      "categories": [
+        {
+          "tag": "instruments",
+          "name": "Weather instruments",
+          "difficulty": 0,
+          "words": {
+            "ANEMOMETER": [],
+            "HYGROMETER": [],
+            "BAROMETER": [],
+            "CEILOMETER": []
+          }
+        },
+        {
+          "tag": "wind-names",
+          "name": "Named winds",
+          "difficulty": 1,
+          "words": {
+            "MISTRAL": [],
+            "SIROCCO": [],
+            "CHINOOK": [],
+            "HABOOB": []
+          }
+        },
+        {
+          "tag": "beaufort",
+          "name": "Beaufort scale descriptions",
+          "difficulty": 2,
+          "words": {
+            "CALM": [],
+            "BREEZE": [],
+            "GALE": [],
+            "HURRICANE": []
+          }
+        },
+        {
+          "tag": "add-bow",
+          "name": "___ + BOW",
+          "difficulty": 3,
+          "words": {
+            "RAIN": [],
+            "ELB": [],
+            "CROSS": [],
+            "LONG": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "shipping-forecast",
+      "categories": [
+        {
+          "tag": "ship-types",
+          "name": "Types of ship",
+          "difficulty": 0,
+          "words": {
+            "BARQUE": [],
+            "SCHOONER": [],
+            "KETCH": [],
+            "BRIGANTINE": []
+          }
+        },
+        {
+          "tag": "harbour",
+          "name": "Harbour features",
+          "difficulty": 1,
+          "words": {
+            "BREAKWATER": [],
+            "QUAY": [],
+            "SLIPWAY": [],
+            "MOLE": [
+              "animals-other"
+            ]
+          }
+        },
+        {
+          "tag": "cargo",
+          "name": "Cargo-handling words",
+          "difficulty": 2,
+          "words": {
+            "STEVEDORE": [],
+            "MANIFEST": [],
+            "DUNNAGE": [],
+            "LADING": []
+          }
+        },
+        {
+          "tag": "add-anchor",
+          "name": "Words for staying put",
+          "difficulty": 3,
+          "words": {
+            "MOOR": [],
+            "BERTH": [],
+            "TETHER": [],
+            "SECURE": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "apothecary",
+      "categories": [
+        {
+          "tag": "medicine-forms",
+          "name": "Forms medicine comes in",
+          "difficulty": 0,
+          "words": {
+            "LOZENGE": [],
+            "TINCTURE": [],
+            "SUPPOSITORY": [],
+            "ELIXIR": []
+          }
+        },
+        {
+          "tag": "old-remedies",
+          "name": "Old remedy words",
+          "difficulty": 1,
+          "words": {
+            "POULTICE": [],
+            "LINIMENT": [],
+            "SALVE": [],
+            "EMBROCATION": []
+          }
+        },
+        {
+          "tag": "measures-old",
+          "name": "Apothecaries' measures",
+          "difficulty": 2,
+          "words": {
+            "MINIM": [],
+            "DRACHM": [],
+            "GRAIN": [],
+            "OUNCE": []
+          }
+        },
+        {
+          "tag": "add-aid",
+          "name": "___ + AID",
+          "difficulty": 3,
+          "words": {
+            "FIRST": [],
+            "BAND": [],
+            "LEG": [],
+            "MERM": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "playground",
+      "categories": [
+        {
+          "tag": "playground-games",
+          "name": "Playground games",
+          "difficulty": 0,
+          "words": {
+            "HOPSCOTCH": [],
+            "TAG": [],
+            "CONKERS": [],
+            "MARBLES": []
+          }
+        },
+        {
+          "tag": "skipping",
+          "name": "Skipping-rope moves",
+          "difficulty": 1,
+          "words": {
+            "DOUBLEDUTCH": [],
+            "CRISSCROSS": [],
+            "BOXER": [],
+            "SIDESWING": []
+          }
+        },
+        {
+          "tag": "playground-kit",
+          "name": "Playground equipment",
+          "difficulty": 2,
+          "words": {
+            "SEESAW": [],
+            "ROUNDABOUT": [],
+            "CLIMBINGFRAME": [],
+            "SANDPIT": []
+          }
+        },
+        {
+          "tag": "add-swing",
+          "name": "Words for a big change",
+          "difficulty": 3,
+          "words": {
+            "SHIFT": [],
+            "PIVOT": [],
+            "LURCH": [],
+            "VEER": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "night-sky",
+      "categories": [
+        {
+          "tag": "constellations",
+          "name": "Constellations",
+          "difficulty": 0,
+          "words": {
+            "CASSIOPEIA": [],
+            "ORION": [],
+            "LYRA": [],
+            "AURIGA": []
+          }
+        },
+        {
+          "tag": "star-types",
+          "name": "Kinds of star",
+          "difficulty": 1,
+          "words": {
+            "PULSAR": [],
+            "CEPHEID": [],
+            "REDGIANT": [],
+            "MAGNETAR": []
+          }
+        },
+        {
+          "tag": "telescope",
+          "name": "Telescope parts and designs",
+          "difficulty": 2,
+          "words": {
+            "NEWTONIAN": [],
+            "EYEPIECE": [],
+            "MOUNT": [],
+            "SECONDARY": []
+          }
+        },
+        {
+          "tag": "add-light-two",
+          "name": "___ + YEAR",
+          "difficulty": 3,
+          "words": {
+            "LEAP": [],
+            "GAP": [],
+            "MID": [],
+            "FISCAL": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "brewhouse",
+      "categories": [
+        {
+          "tag": "brewing-steps",
+          "name": "Brewing steps",
+          "difficulty": 0,
+          "words": {
+            "MASHING": [],
+            "SPARGING": [],
+            "FERMENTING": [],
+            "CONDITIONING": []
+          }
+        },
+        {
+          "tag": "hops",
+          "name": "Hop varieties",
+          "difficulty": 1,
+          "words": {
+            "FUGGLE": [],
+            "GOLDINGS": [],
+            "SAAZ": [],
+            "CASCADE": []
+          }
+        },
+        {
+          "tag": "brew-kit",
+          "name": "Brewery vessels",
+          "difficulty": 2,
+          "words": {
+            "COPPER": [
+              "metals"
+            ],
+            "LAUTERTUN": [],
+            "FERMENTER": [],
+            "KEG": []
+          }
+        },
+        {
+          "tag": "add-head",
+          "name": "___ + HEAD",
+          "difficulty": 3,
+          "words": {
+            "FOUNTAIN": [],
+            "MAST": [],
+            "SPEAR": [],
+            "BLOCK": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "watchmaker",
+      "categories": [
+        {
+          "tag": "watch-parts",
+          "name": "Watch movement parts",
+          "difficulty": 0,
+          "words": {
+            "ESCAPEMENT": [],
+            "MAINSPRING": [],
+            "BALANCEWHEEL": [],
+            "JEWEL": []
+          }
+        },
+        {
+          "tag": "complications",
+          "name": "Watch complications",
+          "difficulty": 1,
+          "words": {
+            "TOURBILLON": [],
+            "PERPETUALCALENDAR": [],
+            "CHRONOGRAPH": [],
+            "MOONPHASE": []
+          }
+        },
+        {
+          "tag": "clock-types",
+          "name": "Kinds of clock",
+          "difficulty": 2,
+          "words": {
+            "LONGCASE": [],
+            "CARRIAGE": [],
+            "CUCKOO": [
+              "birds-other"
+            ],
+            "ATOMIC": []
+          }
+        },
+        {
+          "tag": "add-hand",
+          "name": "___ + HAND",
+          "difficulty": 3,
+          "words": {
+            "SECOND": [],
+            "SHORT": [],
+            "FARM": [],
+            "UNDER": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "fresh-water",
+      "categories": [
+        {
+          "tag": "river-features",
+          "name": "River features",
+          "difficulty": 0,
+          "words": {
+            "MEANDER": [],
+            "OXBOW": [],
+            "RIFFLE": [],
+            "CONFLUENCE": []
+          }
+        },
+        {
+          "tag": "freshwater-fish",
+          "name": "Freshwater fish",
+          "difficulty": 1,
+          "words": {
+            "BARBEL": [],
+            "GUDGEON": [],
+            "TENCH": [],
+            "CHUB": []
+          }
+        },
+        {
+          "tag": "fly-fishing",
+          "name": "Fly-fishing terms",
+          "difficulty": 2,
+          "words": {
+            "HACKLE": [],
+            "TIPPET": [],
+            "NYMPH": [],
+            "MENDING": []
+          }
+        },
+        {
+          "tag": "add-bank",
+          "name": "___ + BANK",
+          "difficulty": 3,
+          "words": {
+            "SAND": [],
+            "PIGGY": [],
+            "MOUNTE": [],
+            "EMBANK": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "bakery-window",
+      "categories": [
+        {
+          "tag": "breads",
+          "name": "Breads",
+          "difficulty": 0,
+          "words": {
+            "CIABATTA": [],
+            "FOCACCIA": [],
+            "PUMPERNICKEL": [],
+            "BRIOCHE": []
+          }
+        },
+        {
+          "tag": "pastry",
+          "name": "Kinds of pastry",
+          "difficulty": 1,
+          "words": {
+            "CHOUX": [],
+            "ROUGHPUFF": [],
+            "FILO": [],
+            "SHORTCRUST": []
+          }
+        },
+        {
+          "tag": "bakery-tools",
+          "name": "Baker's kit",
+          "difficulty": 2,
+          "words": {
+            "BANNETON": [],
+            "LAME": [],
+            "PEEL": [],
+            "COUCHE": []
+          }
+        },
+        {
+          "tag": "add-roll",
+          "name": "___ + ROLL",
+          "difficulty": 3,
+          "words": {
+            "DRUM": [],
+            "BARREL": [],
+            "PAY": [],
+            "LOG": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "hall-of-mirrors",
+      "categories": [
+        {
+          "tag": "optics",
+          "name": "Optics terms",
+          "difficulty": 0,
+          "words": {
+            "REFRACTION": [],
+            "DIFFRACTION": [],
+            "POLARISATION": [],
+            "ABERRATION": []
+          }
+        },
+        {
+          "tag": "lens-types",
+          "name": "Kinds of lens",
+          "difficulty": 1,
+          "words": {
+            "CONVEX": [],
+            "CONCAVE": [],
+            "FRESNEL": [],
+            "TOROIDAL": []
+          }
+        },
+        {
+          "tag": "illusions",
+          "name": "Visual illusions",
+          "difficulty": 2,
+          "words": {
+            "MOIRE": [],
+            "AFTERIMAGE": [],
+            "ANAMORPHOSIS": [],
+            "PAREIDOLIA": []
+          }
+        },
+        {
+          "tag": "add-glass-two",
+          "name": "Words for reflecting",
+          "difficulty": 3,
+          "words": {
+            "MIRROR": [],
+            "ECHO": [],
+            "MIMIC": [],
+            "PARROT": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "long-grass",
+      "categories": [
+        {
+          "tag": "cricket-fielding",
+          "name": "Cricket fielding positions",
+          "difficulty": 0,
+          "words": {
+            "GULLY": [],
+            "SILLYPOINT": [],
+            "FINELEG": [],
+            "COVER": []
+          }
+        },
+        {
+          "tag": "cricket-deliveries",
+          "name": "Types of delivery",
+          "difficulty": 1,
+          "words": {
+            "GOOGLY": [],
+            "YORKER": [],
+            "DOOSRA": [],
+            "BOUNCER": []
+          }
+        },
+        {
+          "tag": "grasses",
+          "name": "Grasses",
+          "difficulty": 2,
+          "words": {
+            "FESCUE": [],
+            "TIMOTHY": [],
+            "COCKSFOOT": [],
+            "BENT": []
+          }
+        },
+        {
+          "tag": "add-field",
+          "name": "___ + FIELD",
+          "difficulty": 3,
+          "words": {
+            "MINE": [],
+            "AIR": [],
+            "BATTLE": [],
+            "CORN": []
+          }
+        }
+      ]
+    }
+  ]
+}

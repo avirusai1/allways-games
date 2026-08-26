@@ -61,6 +61,7 @@ const List<GameCatalogEntry> gameCatalog = [
     displayName: 'Groups',
     tagline: 'Find four groups of four',
     icon: Icons.grain_rounded,
+    enabled: true,
   ),
   GameCatalogEntry(
     id: 'weave',

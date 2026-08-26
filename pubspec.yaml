@@ -81,6 +81,7 @@ flutter:
     - assets/content/word_loop/
     - assets/content/honeycomb/
     - assets/content/tile_match/
+    - assets/content/groups/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

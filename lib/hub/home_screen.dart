@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app/theme/colors.dart';
 import '../games/five/presentation/five_screen.dart';
+import '../games/groups/presentation/groups_screen.dart';
 import '../games/honeycomb/presentation/honeycomb_screen.dart';
 import '../games/sudoku/presentation/sudoku_screen.dart';
 import '../games/tile_match/presentation/tile_match_screen.dart';
@@ -58,6 +59,7 @@ void _openGame(BuildContext context, String gameId) {
     'word_loop' => const WordLoopScreen(),
     'honeycomb' => const HoneycombScreen(),
     'tile_match' => const TileMatchScreen(),
+    'groups' => const GroupsScreen(),
     _ => null,
   };
   if (screen == null) return;
