@@ -40,6 +40,7 @@ const List<GameCatalogEntry> gameCatalog = [
     displayName: 'Word Loop',
     tagline: 'Chain words around the box',
     icon: Icons.hexagon_outlined,
+    enabled: true,
   ),
   GameCatalogEntry(
     id: 'honeycomb',
