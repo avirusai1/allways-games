@@ -4,6 +4,7 @@ import '../app/theme/colors.dart';
 import '../games/five/presentation/five_screen.dart';
 import '../games/honeycomb/presentation/honeycomb_screen.dart';
 import '../games/sudoku/presentation/sudoku_screen.dart';
+import '../games/tile_match/presentation/tile_match_screen.dart';
 import '../games/word_loop/presentation/word_loop_screen.dart';
 import 'game_catalog.dart';
 
@@ -56,6 +57,7 @@ void _openGame(BuildContext context, String gameId) {
     'sudoku' => const SudokuScreen(),
     'word_loop' => const WordLoopScreen(),
     'honeycomb' => const HoneycombScreen(),
+    'tile_match' => const TileMatchScreen(),
     _ => null,
   };
   if (screen == null) return;

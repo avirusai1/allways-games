@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/daily_seed/daily_seed.dart';
 import '../../../core/persistence/streak.dart';
+import '../../../shared_game_kit/clock/puzzle_clock.dart';
 import '../../../shared_game_kit/grid/puzzle_grid.dart';
 import '../../../shared_game_kit/share_card/share_card.dart';
 import '../domain/sudoku_board.dart';
@@ -12,11 +13,9 @@ import 'sudoku_providers.dart';
 import 'widgets/number_pad.dart';
 import 'widgets/sudoku_cell.dart';
 
-String formatDuration(int totalSeconds) {
-  final minutes = (totalSeconds ~/ 60).toString().padLeft(2, '0');
-  final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
-  return '$minutes:$seconds';
-}
+/// Sudoku's clock is the app's shared puzzle clock; kept as a named
+/// alias so the screen reads in its own terms.
+String formatDuration(int totalSeconds) => formatPuzzleClock(totalSeconds);
 
 class SudokuScreen extends ConsumerWidget {
   const SudokuScreen({super.key});

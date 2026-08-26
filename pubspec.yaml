@@ -80,6 +80,7 @@ flutter:
     - assets/content/sudoku/
     - assets/content/word_loop/
     - assets/content/honeycomb/
+    - assets/content/tile_match/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

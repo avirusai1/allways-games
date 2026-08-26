@@ -54,6 +54,7 @@ const List<GameCatalogEntry> gameCatalog = [
     displayName: 'Tile Match',
     tagline: 'Clear the board in pairs',
     icon: Icons.dashboard_customize_rounded,
+    enabled: true,
   ),
   GameCatalogEntry(
     id: 'groups',
