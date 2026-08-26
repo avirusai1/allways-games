@@ -1,0 +1,42 @@
+import 'package:flutter/material.dart';
+
+/// Original color palette for Allways Games.
+///
+/// Deliberately distinct from NYT Games' black/white crossword icon style
+/// and from Wordle's green/yellow/gray tile scheme.
+class AppColors {
+  AppColors._();
+
+  static const Color primary = Color(0xFF1F5B4C); // deep teal
+  static const Color primaryContainer = Color(0xFFD7ECE3);
+  static const Color secondary = Color(0xFFE0862F); // warm amber accent
+  static const Color secondaryContainer = Color(0xFFFCE6C8);
+
+  static const Color background = Color(0xFFFBF7F0); // warm cream
+  static const Color surface = Color(0xFFFFFFFF);
+  static const Color surfaceAlt = Color(0xFFF1EBDD);
+
+  static const Color textPrimary = Color(0xFF20241F);
+  static const Color textSecondary = Color(0xFF5B6259);
+
+  // Puzzle feedback states (Wordle-style guess grids etc.)
+  // Chosen to be visually distinct from Wordle's exact green/yellow/gray.
+  static const Color feedbackCorrect = Color(0xFF2E7D5B); // spruce green
+  static const Color feedbackPresent = Color(0xFFE0862F); // amber
+  static const Color feedbackAbsent = Color(0xFFB9B2A2); // warm stone gray
+
+  static const Color streakFlame = Color(0xFFD9491A);
+
+  static const ColorScheme scheme = ColorScheme.light(
+    primary: primary,
+    primaryContainer: primaryContainer,
+    secondary: secondary,
+    secondaryContainer: secondaryContainer,
+    surface: surface,
+    error: Color(0xFFB3261E),
+    onPrimary: Colors.white,
+    onSecondary: Colors.white,
+    onSurface: textPrimary,
+    onError: Colors.white,
+  );
+}
