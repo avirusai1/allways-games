@@ -123,8 +123,35 @@ class GroupsValidator {
       }
     }
 
-    // The same word may appear in different puzzles — that is normal — but
-    // a whole category repeated verbatim means two days play identically.
+    // A single category may recur in a later puzzle — the bank is partly
+    // composed by recombining authored categories, so that is by design and
+    // only one group of four is familiar. What must never recur is a whole
+    // puzzle: the same four categories together would play identically.
+    final seenPuzzles = <String, String>{};
+    for (final puzzle in puzzles) {
+      final key = (puzzle.categories.map((c) => c.tag).toList()..sort()).join('|');
+      final previous = seenPuzzles[key];
+      if (previous != null) {
+        defects.add(GroupsDefect(
+          puzzle.id,
+          'is the same four categories as $previous',
+        ));
+      }
+      seenPuzzles[key] = puzzle.id;
+    }
+
+    return defects;
+  }
+
+  /// Checks the hand-authored source, which is held to a stricter rule than
+  /// the shipped bank: no authored category may duplicate another.
+  ///
+  /// Recombination is only safe if the pool it draws from has no
+  /// accidental twins, so this is where a category written twice by hand
+  /// gets caught — not in the bank, where reuse is intentional.
+  static List<GroupsDefect> validateAuthoredSource(List<GroupsPuzzle> puzzles) {
+    final defects = validateBank(puzzles);
+
     final seenCategories = <String, String>{};
     for (final puzzle in puzzles) {
       for (final category in puzzle.categories) {

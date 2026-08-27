@@ -21,8 +21,9 @@ GroupsCategory _category(
 }
 
 /// A clean four-by-four puzzle for the tests to break in specific ways.
-GroupsPuzzle _puzzle({List<GroupsCategory>? categories}) => GroupsPuzzle(
-      id: 'test',
+GroupsPuzzle _puzzle({List<GroupsCategory>? categories, String id = 'test'}) =>
+    GroupsPuzzle(
+      id: id,
       categories: categories ??
           [
             _category('alpha', 0, ['AONE', 'ATWO', 'ATHREE', 'AFOUR']),
@@ -202,7 +203,7 @@ void main() {
       );
     });
 
-    test('a category repeated verbatim across puzzles is caught', () {
+    test('a category repeated verbatim is caught in the authored source', () {
       final second = GroupsPuzzle(
         id: 'other',
         categories: [
@@ -214,10 +215,36 @@ void main() {
         ],
       );
       expect(
-        GroupsValidator.validateBank([_puzzle(), second])
+        GroupsValidator.validateAuthoredSource([_puzzle(), second])
             .map((d) => d.message)
             .join(),
         contains('repeats one from'),
+      );
+    });
+
+    test('a shared category is allowed in the shipped bank', () {
+      // The bank is partly composed by recombining authored categories, so
+      // one group recurring in a different set of four is by design.
+      final second = GroupsPuzzle(
+        id: 'other',
+        categories: [
+          _category('alpha2', 0, ['AONE', 'ATWO', 'ATHREE', 'AFOUR']),
+          _category('beta2', 1, ['EONE', 'ETWO', 'ETHREE', 'EFOUR']),
+          _category('gamma2', 2, ['FONE', 'FTWO', 'FTHREE', 'FFOUR']),
+          _category('delta2', 3, ['GONE', 'GTWO', 'GTHREE', 'GFOUR']),
+        ],
+      );
+      expect(GroupsValidator.validateBank([_puzzle(), second]), isEmpty);
+    });
+
+    test('the same four categories twice is caught', () {
+      // One shared group is fine; a whole repeated puzzle would play
+      // identically on two days.
+      expect(
+        GroupsValidator.validateBank([_puzzle(), _puzzle(id: 'other')])
+            .map((d) => d.message)
+            .join(),
+        contains('same four categories'),
       );
     });
 
