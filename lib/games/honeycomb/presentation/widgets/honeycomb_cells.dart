@@ -24,9 +24,12 @@ class HexagonBorder extends ShapeBorder {
     final radius = rect.shortestSide / 2;
     final path = Path();
     for (var i = 0; i < 6; i++) {
-      // Start at the top so the flat edges sit left and right, which is
-      // what lets six cells pack tightly around a seventh.
-      final angle = pi / 3 * i - pi / 2;
+      // Flat-top hexagon: vertices at 0deg, 60deg, ... put the points left
+      // and right and the flat edges top and bottom. That is the
+      // orientation the ring layout below assumes — it places one cell
+      // directly above the centre and one directly below, which only
+      // packs tightly for flat-top cells.
+      final angle = pi / 3 * i;
       final point = Offset(
         centre.dx + radius * cos(angle),
         centre.dy + radius * sin(angle),
@@ -113,10 +116,17 @@ class HoneycombCluster extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Flat-top hexagons tile with neighbours at 3/4 of a cell horizontally
-    // and half a cell vertically; the ring sits one cell-width out.
-    final dx = cellSize * 0.87;
-    final dy = cellSize * 0.76;
+    // A flat-top hexagon drawn inside a [cellSize] square spans cellSize
+    // point-to-point across and sqrt(3)/2 of that flat-to-flat down. Cells
+    // touch exactly when neighbours sit 3/4 of the width apart
+    // horizontally and a full flat-to-flat height apart vertically;
+    // anything less and the cells overlap.
+    // Nudged just past exact tangency so a hairline of background shows
+    // between cells: touching cells of the same colour merge into one
+    // blob and stop reading as six separate tap targets.
+    const gap = 1.05;
+    final dx = cellSize * 0.75 * gap;
+    final dy = cellSize * sqrt(3) / 2 * gap;
     const offsets = [
       Offset(0, -1),
       Offset(1, -0.5),
@@ -126,8 +136,10 @@ class HoneycombCluster extends StatelessWidget {
       Offset(-1, -0.5),
     ];
 
+    // Widest across the middle row (centre cell plus a full cell either
+    // side); tallest through the vertical column of three stacked cells.
     final width = cellSize + 2 * dx;
-    final height = cellSize + 2 * dy;
+    final height = 3 * dy;
 
     return SizedBox(
       width: width,
