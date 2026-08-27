@@ -33,6 +33,7 @@ const List<GameCatalogEntry> gameCatalog = [
     displayName: 'Sudoku',
     tagline: 'Fill the grid, no repeats',
     icon: Icons.apps_rounded,
+    enabled: true,
   ),
   GameCatalogEntry(
     id: 'word_loop',
