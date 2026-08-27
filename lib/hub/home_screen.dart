@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../app/theme/colors.dart';
 import '../core/ads/banner_ad_slot.dart';
 import '../games/crossword/presentation/crossword_screen.dart';
+import '../games/dot_dominoes/presentation/domino_screen.dart';
 import '../games/five/presentation/five_screen.dart';
 import '../games/groups/presentation/groups_screen.dart';
 import '../games/honeycomb/presentation/honeycomb_screen.dart';
@@ -127,6 +128,7 @@ void _openGame(BuildContext context, String gameId) {
     'groups' => const GroupsScreen(),
     'weave' => const WeaveScreen(),
     'crossword' => const CrosswordScreen(),
+    'dot_dominoes' => const DominoScreen(),
     _ => null,
   };
   if (screen == null) return;

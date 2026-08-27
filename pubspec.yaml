@@ -87,6 +87,7 @@ flutter:
     - assets/content/tile_match/
     - assets/content/weave/
     - assets/content/crossword/
+    - assets/content/dot_dominoes/
     - assets/content/groups/
 
   # An image asset can refer to one or more resolution-specific "variants", see

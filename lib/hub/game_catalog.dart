@@ -89,5 +89,6 @@ const List<GameCatalogEntry> gameCatalog = [
     displayName: 'Dot Dominoes',
     tagline: 'Place dominoes to fit each region',
     accent: Color(0xFFA85434),
+    enabled: true,
   ),
 ];
