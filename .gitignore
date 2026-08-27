@@ -47,3 +47,8 @@ app.*.map.json
 
 # Claude Code session artifacts
 .claude/
+
+# Android release signing — never commit these
+/android/key.properties
+*.jks
+*.keystore

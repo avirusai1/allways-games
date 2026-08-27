@@ -68,6 +68,7 @@ const List<GameCatalogEntry> gameCatalog = [
     displayName: 'Weave',
     tagline: 'Trace the hidden theme words',
     icon: Icons.gesture_rounded,
+    enabled: true,
   ),
   GameCatalogEntry(
     id: 'crossword',

@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '../core/ads/banner_ad_slot.dart';
+
 import '../app/theme/colors.dart';
 import '../games/five/presentation/five_screen.dart';
 import '../games/groups/presentation/groups_screen.dart';
 import '../games/honeycomb/presentation/honeycomb_screen.dart';
 import '../games/sudoku/presentation/sudoku_screen.dart';
 import '../games/tile_match/presentation/tile_match_screen.dart';
+import '../games/weave/presentation/weave_screen.dart';
 import '../games/word_loop/presentation/word_loop_screen.dart';
 import 'game_catalog.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -17,7 +21,16 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Allways Games'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+            ),
+          ),
+        ],
       ),
+      bottomNavigationBar: const SafeArea(child: BannerAdSlot()),
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -59,6 +72,7 @@ void _openGame(BuildContext context, String gameId) {
     'word_loop' => const WordLoopScreen(),
     'honeycomb' => const HoneycombScreen(),
     'tile_match' => const TileMatchScreen(),
+    'weave' => const WeaveScreen(),
     'groups' => const GroupsScreen(),
     _ => null,
   };

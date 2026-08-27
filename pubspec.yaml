@@ -49,6 +49,10 @@ dependencies:
   # Sharing a puzzle result to other apps
   share_plus: ^10.1.4
 
+  # Monetisation: ads for free players, in-app purchase to remove them
+  google_mobile_ads: ^9.1.0
+  in_app_purchase: ^3.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -81,6 +85,7 @@ flutter:
     - assets/content/word_loop/
     - assets/content/honeycomb/
     - assets/content/tile_match/
+    - assets/content/weave/
     - assets/content/groups/
 
   # An image asset can refer to one or more resolution-specific "variants", see

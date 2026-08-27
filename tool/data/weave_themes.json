@@ -1,0 +1,110 @@
+{
+  "_comment": [
+    "Authored theme word lists for the Weave game. Original work: every",
+    "theme and word list here was written for this app.",
+    "",
+    "Each theme needs a spread of lengths. The generator has to pick a",
+    "subset summing to exactly the 42 cells of the grid, at least one of",
+    "which is 7+ letters so it can span top to bottom, so a theme with",
+    "only 5-letter words will never pack. Aim for 12+ words per theme",
+    "spanning roughly 4 to 11 letters."
+  ],
+  "themes": [
+    {
+      "clue": "In the toolbox",
+      "words": ["SCREWDRIVER", "SPANNER", "CHISEL", "MALLET", "PLIERS", "WRENCH", "HAMMER", "RASP", "AWL", "CLAMP", "SANDER", "DRILL", "LEVEL", "VICE", "FILE"]
+    },
+    {
+      "clue": "Weather on the way",
+      "words": ["THUNDERSTORM", "BLIZZARD", "DRIZZLE", "HAILSTONE", "MONSOON", "TORNADO", "SLEET", "FROST", "SQUALL", "MIST", "GALE", "HAZE", "SHOWER", "CYCLONE"]
+    },
+    {
+      "clue": "Down at the harbour",
+      "words": ["LIGHTHOUSE", "BREAKWATER", "TRAWLER", "MOORING", "ANCHOR", "JETTY", "WHARF", "BUOY", "QUAY", "MAST", "CARGO", "TIDE", "DOCK", "CRANE", "PONTOON"]
+    },
+    {
+      "clue": "At the bakery",
+      "words": ["SOURDOUGH", "CROISSANT", "BAGUETTE", "STRUDEL", "MUFFIN", "SCONE", "CRUMB", "YEAST", "DOUGH", "LOAF", "TART", "ICING", "FLOUR", "BRIOCHE"]
+    },
+    {
+      "clue": "Around the office",
+      "words": ["STAPLER", "KEYBOARD", "LANYARD", "MONITOR", "FOLDER", "BINDER", "DESK", "CHAIR", "PRINTER", "MEMO", "INBOX", "CLIP", "DIARY", "SHREDDER"]
+    },
+    {
+      "clue": "Deep midwinter",
+      "words": ["SNOWDRIFT", "TOBOGGAN", "MITTENS", "ICICLE", "SHIVER", "THAW", "SLEDGE", "FROSTBITE", "SCARF", "SKATE", "CHILL", "SLUSH", "FLEECE", "WINTER"]
+    },
+    {
+      "clue": "Life on the farm",
+      "words": ["SCARECROW", "HAYSTACK", "TRACTOR", "PADDOCK", "TROUGH", "SILO", "BARN", "FURROW", "HARVEST", "PLOUGH", "STABLE", "MEADOW", "FENCE", "ORCHARD"]
+    },
+    {
+      "clue": "The sewing box",
+      "words": ["PINCUSHION", "THIMBLE", "BOBBIN", "NEEDLE", "THREAD", "SPOOL", "SEAM", "HEM", "PATTERN", "BUTTON", "ZIPPER", "FABRIC", "STITCH", "TAILOR"]
+    },
+    {
+      "clue": "Sending a letter",
+      "words": ["POSTMARK", "ENVELOPE", "PARCEL", "STAMP", "COURIER", "MAILBAG", "ADDRESS", "SEAL", "POSTCARD", "DELIVERY", "SORTER", "FRANK", "ROUND", "PIGEON"]
+    },
+    {
+      "clue": "Crossing the desert",
+      "words": ["SANDSTORM", "CARAVAN", "OASIS", "CAMEL", "DUNE", "MIRAGE", "SCORPION", "CACTUS", "NOMAD", "WELL", "SHADE", "GOURD", "SADDLE", "DROUGHT"]
+    },
+    {
+      "clue": "Up the mountain",
+      "words": ["CRAMPONS", "AVALANCHE", "SUMMIT", "RIDGE", "GLACIER", "CREVASSE", "ASCENT", "ROPE", "SCREE", "CAIRN", "PEAK", "SLOPE", "ALTITUDE", "BOULDER"]
+    },
+    {
+      "clue": "In the greenhouse",
+      "words": ["PROPAGATOR", "SEEDLING", "COMPOST", "TROWEL", "POTTING", "CLOCHE", "FROND", "SOIL", "SPROUT", "TENDRIL", "WATERING", "GRAFT", "MULCH", "BLOOM"]
+    },
+    {
+      "clue": "The night sky",
+      "words": ["CONSTELLATION", "TELESCOPE", "METEOR", "COMET", "ORBIT", "ECLIPSE", "GALAXY", "NEBULA", "CRATER", "LUNAR", "STAR", "MOON", "COSMOS", "PLANET"]
+    },
+    {
+      "clue": "Making a film",
+      "words": ["CLAPPERBOARD", "STORYBOARD", "DIRECTOR", "CAMERA", "SCRIPT", "EDITOR", "SCENE", "TAKE", "BOOM", "DOLLY", "REEL", "CUT", "STUNT", "SCORE"]
+    },
+    {
+      "clue": "A day at the beach",
+      "words": ["DECKCHAIR", "SUNSCREEN", "SEAWEED", "PEBBLE", "SHELL", "TIDE", "SANDAL", "BUCKET", "SPADE", "SURF", "DUNE", "COVE", "PARASOL", "SHORE"]
+    },
+    {
+      "clue": "In the laboratory",
+      "words": ["CENTRIFUGE", "MICROSCOPE", "PIPETTE", "BEAKER", "BURNER", "FUNNEL", "FLASK", "SLIDE", "SAMPLE", "TONGS", "REAGENT", "CULTURE", "GLOVE", "BALANCE"]
+    },
+    {
+      "clue": "The orchestra pit",
+      "words": ["CONTRABASS", "PERCUSSION", "CLARINET", "TIMPANI", "OBOE", "CELLO", "VIOLA", "HARP", "BATON", "SCORE", "ROSIN", "REED", "STAND", "TUNING"]
+    },
+    {
+      "clue": "Winter in the woods",
+      "words": ["UNDERGROWTH", "EVERGREEN", "BRAMBLE", "THICKET", "ANTLER", "BURROW", "MOSS", "BARK", "FROND", "TRUNK", "HOLLOW", "LICHEN", "OWL", "FOX"]
+    },
+    {
+      "clue": "Building a house",
+      "words": ["FOUNDATION", "SCAFFOLD", "PLASTER", "RAFTER", "MORTAR", "BRICK", "JOIST", "BEAM", "GABLE", "LINTEL", "TRUSS", "SLATE", "CEMENT", "GIRDER"]
+    },
+    {
+      "clue": "On the trading floor",
+      "words": ["COMMODITY", "PORTFOLIO", "DIVIDEND", "BROKER", "MARGIN", "HEDGE", "BOND", "YIELD", "SHARE", "TICKER", "FUTURES", "TRADER", "SPREAD", "EQUITY"]
+    },
+    {
+      "clue": "Making pottery",
+      "words": ["EARTHENWARE", "STONEWARE", "PORCELAIN", "TURNTABLE", "KILN", "GLAZE", "SLIP", "WHEEL", "CLAY", "BISQUE", "THROW", "RIM", "HANDLE", "FIRING"]
+    },
+    {
+      "clue": "The printing works",
+      "words": ["LITHOGRAPH", "TYPESETTER", "IMPRESSION", "PLATEN", "GALLEY", "INK", "PRESS", "FOLIO", "MARGIN", "BINDING", "PROOF", "SERIF", "QUIRE", "STENCIL"]
+    },
+    {
+      "clue": "Down the river",
+      "words": ["WATERFALL", "MEANDER", "CURRENT", "ESTUARY", "RAPIDS", "BANK", "SILT", "DELTA", "FORD", "WEIR", "OTTER", "REED", "PADDLE", "SOURCE"]
+    },
+    {
+      "clue": "In the cheese shop",
+      "words": ["ROQUEFORT", "CAMEMBERT", "CHEDDAR", "GRUYERE", "STILTON", "BRIE", "CURD", "RIND", "WHEY", "WHEEL", "AGEING", "CRUMBLY", "MOULD", "PARING"]
+    }
+  ]
+}
