@@ -26,32 +26,40 @@ class OnScreenKeyboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _keyRow(context, _row1),
-        const SizedBox(height: 8),
-        _keyRow(context, _row2),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _ActionKey(label: 'ENTER', flex: 3, onTap: onSubmit),
-            const SizedBox(width: 6),
-            ..._row3.map((l) => _LetterKey(
-                  letter: l,
-                  state: letterStates[l],
-                  onTap: () => onLetter(l),
-                )),
-            const SizedBox(width: 6),
-            _ActionKey(
-              flex: 3,
-              onTap: onBackspace,
-              child: const Icon(Icons.backspace_outlined, size: 18),
-            ),
-          ],
-        ),
-      ],
+    // Every game screen wraps this in a SafeArea, so the system gesture
+    // inset is already gone by the time we get here. This is the extra
+    // breathing room on top of it: flush against the gesture bar the
+    // ENTER row is awkward to hit and easy to turn into a back-swipe by
+    // accident, which costs more than the space does.
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 22),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _keyRow(context, _row1),
+          const SizedBox(height: 8),
+          _keyRow(context, _row2),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _ActionKey(label: 'ENTER', flex: 3, onTap: onSubmit),
+              const SizedBox(width: 6),
+              ..._row3.map((l) => _LetterKey(
+                    letter: l,
+                    state: letterStates[l],
+                    onTap: () => onLetter(l),
+                  )),
+              const SizedBox(width: 6),
+              _ActionKey(
+                flex: 3,
+                onTap: onBackspace,
+                child: const Icon(Icons.backspace_outlined, size: 18),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -87,8 +95,8 @@ class _LetterKey extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           onTap: onTap,
           child: Container(
-            width: 32,
-            height: 44,
+            width: 34,
+            height: 48,
             alignment: Alignment.center,
             child: Text(
               letter,
@@ -140,7 +148,7 @@ class _ActionKey extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             onTap: onTap,
             child: Container(
-              height: 44,
+              height: 48,
               alignment: Alignment.center,
               child: child ??
                   Text(
