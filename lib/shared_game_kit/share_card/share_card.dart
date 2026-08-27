@@ -32,6 +32,28 @@ class ShareCard {
     return buffer.toString().trim();
   }
 
+  /// Result text for games that have no guess grid to draw.
+  ///
+  /// Same headline shape as [buildResultText] so every game's share card
+  /// reads as coming from the same app, with each game supplying its own
+  /// body [lines] (a time, a word count, a tier).
+  static String buildSummaryResultText({
+    required String appName,
+    required String gameName,
+    required int dayIndex,
+    required String score,
+    List<String> lines = const [],
+  }) {
+    final buffer = StringBuffer()..writeln('$appName $gameName #$dayIndex $score');
+    if (lines.isNotEmpty) {
+      buffer.writeln();
+      for (final line in lines) {
+        buffer.writeln(line);
+      }
+    }
+    return buffer.toString().trim();
+  }
+
   static Future<void> share(String text) {
     return Share.share(text);
   }
