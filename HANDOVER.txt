@@ -1,0 +1,574 @@
+ALLWAYS GAMES — PROJECT HANDOVER
+Written: 2026-08-27
+Repo: https://github.com/avirusai1/allways-games (private)
+For: continuing development/marketing on a different Claude Code account
+
+================================================================================
+0. READ THIS FIRST — THE ONE THING THAT ACTUALLY MATTERS
+================================================================================
+
+The app is NOT YET SIGNED WITH A REAL RELEASE KEY. No keystore exists.
+
+Nothing has been published. Nothing can be lost. But the FIRST thing you
+do with this project, before anything else, should be:
+
+    keytool -genkey -v -keystore ~/allways-upload.jks -keyalg RSA \
+      -keysize 2048 -validity 10000 -alias upload
+
+Then create android/key.properties (gitignored, never commit it):
+
+    storePassword=<your password>
+    keyPassword=<your password>
+    keyAlias=upload
+    storeFile=/absolute/path/to/allways-upload.jks
+
+android/app/build.gradle.kts already reads this file automatically and
+falls back to the debug key if it's absent (see the "hasUploadKey" logic
+near the top of that file). Once key.properties exists, a normal
+`flutter build appbundle --release` produces a Play-ready AAB.
+
+BACK UP THE .jks FILE SOMEWHERE OUTSIDE THIS MACHINE THE MOMENT YOU MAKE
+IT. Losing it means you can never update this app again once published.
+Leaking it means someone else can publish as you. Do not put it in the
+repo, do not paste it into a chat, do not email it to yourself unencrypted.
+
+================================================================================
+1. WHAT THIS PROJECT IS
+================================================================================
+
+"Allways Games" is an ORIGINAL Android puzzle-game app — the same GENRE as
+the NYT Games app (Wordle, Sudoku, Connections, Strands, Letter Boxed,
+Spelling Bee, Pips, Tiles, Crossword) but wholly owned: original code,
+original branding, original puzzle content, original names.
+
+This distinction is load-bearing and must be preserved by anyone who
+touches this project. Read section 2 before writing a single line of code
+or a single line of marketing copy.
+
+Package ID: com.techallways.games (LOCKED — changing it after any Play
+Console upload creates a new app listing, not an update)
+App display name: "Allways Games"
+Flutter project name: allways_games
+Current version: 1.0.0+1 (pubspec.yaml)
+
+Platform: Android only (structured so iOS could be added later without a
+rewrite — domain logic has zero Flutter imports throughout).
+
+================================================================================
+2. THE LEGAL FRAMING — NON-NEGOTIABLE, READ BEFORE DOING ANYTHING
+================================================================================
+
+WHY THIS APP IS LEGAL: Generic puzzle MECHANICS (a grid of letter guesses,
+grouping words into hidden categories, a crossword grid, sudoku, a
+domino-placement puzzle) are NOT copyrightable or ownable by NYT or anyone
+else. What IS protected is NYT's SPECIFIC EXPRESSION: their exact puzzle
+content, their clues, their branding/trademarks, their visual design, their
+code. This app implements the generic mechanics with 100% original
+everything else.
+
+HARD RULES for any future work on this project:
+
+  1. NEVER copy puzzle content, clues, word lists, category sets, board
+     layouts, art, icons, copy/microcopy, or UI designs from NYT or any
+     other existing app or website. Every word list and clue in this repo
+     was either generated algorithmically from PUBLIC DOMAIN sources
+     (ENABLE1 word list, Norvig's public n-gram frequency data — both in
+     tool/data/) or authored fresh by an AI/human FOR THIS APP.
+
+  2. NEVER use the names Wordle, Connections, Strands, Letter Boxed, Pips,
+     Spelling Bee, or Tiles anywhere — code, UI, store listing, marketing
+     copy, ASO keywords, app name, screenshots. These are very likely
+     trademarks (Wordle definitely is — NYT acquired it from its creator).
+     This app already uses its own original names for every mode:
+
+         NYT-genre equivalent    -->   This app's name
+         Wordle-style            -->   Five
+         Sudoku                  -->   Sudoku (generic term, fine as-is)
+         Letter Boxed-style      -->   Word Loop
+         Spelling Bee-style      -->   Honeycomb
+         Tiles-style             -->   Tile Match
+         Connections-style       -->   Groups
+         Strands-style           -->   Weave
+         Crossword               -->   Crossword (generic term, fine as-is)
+         Pips-style               -->   Dot Dominoes
+
+     If you write marketing copy, ASO listings, App Store descriptions,
+     social posts, etc. — DO NOT mention any NYT product name for
+     comparison ("like Wordle but..."). Even truthful comparative
+     marketing using someone else's trademark for a lookalike product is
+     a much bigger legal risk than the app itself. Describe games by
+     MECHANIC ("guess a 5-letter word in 6 tries") not by brand
+     comparison.
+
+  3. Never scrape, reproduce, or reference NYT's actual puzzles, archive,
+     or clue database in any way, including "for research" or "to
+     understand difficulty calibration." Play the public NYT app for
+     RULES understanding only if genuinely necessary (this was done once,
+     for Pips/Dot Dominoes, since its ruleset had no long-established
+     public-domain precedent the way crossword/sudoku do) — never to copy
+     specific content.
+
+  4. If you ever connect an AI subagent or automated pipeline to "research
+     the market and generate more puzzle content," the same rules apply.
+     Brief any agent/subagent working on this project with this section
+     verbatim before it touches content or marketing copy.
+
+  5. Store listing / marketing: describe this as an original daily
+     puzzle app. It is fine and normal to say things like "if you love
+     daily word and logic puzzles, you'll love this" — it is NOT fine to
+     say "the same games as [X]" or use any NYT mark as a keyword,
+     hashtag, or comparison point.
+
+================================================================================
+3. CURRENT STATE — WHAT'S DONE
+================================================================================
+
+ALL 9 GAMES ARE BUILT, TESTED, AND VERIFIED ON A PHYSICAL DEVICE (Samsung
+SM G990E). This is not "should work" — each one was actually played
+end-to-end on real hardware, including a full win + streak + persistence
+check, before being committed.
+
+  Game          | Content bank size          | Notes
+  --------------|----------------------------|---------------------------
+  Five          | 1500 answers / 8636 valid  | Wordle-style, duplicate-
+                | guesses (~4.1 years)       | letter logic unit tested
+  Sudoku        | 1825 puzzles (5.0 yrs)     | Backtracking generator,
+                |                            | uniqueness-verified
+  Word Loop     | 1825 boards (5.0 yrs)      | Letter-boxed word chain,
+                |                            | solver-in-the-loop gen
+  Honeycomb     | 1700 boards (4.7 yrs)      | Hits its letter-set
+                |                            | candidate ceiling ~1700
+  Tile Match    | 1825 boards (5.0 yrs)      | Layered tile-matching,
+                |                            | original glyph set
+  Groups        | 730 puzzles (2.0 yrs)      | 60 HAND-AUTHORED puzzles,
+                |                            | rest COMPOSED from those
+                |                            | 240 categories by an
+                |                            | algorithm (see section 5,
+                |                            | this is the one weak spot)
+  Weave         | 1714 puzzles (4.7 yrs)     | 24 authored themes, exact
+                |                            | subset-sum word-set
+                |                            | selection + region-pruned
+                |                            | packer + accidental-word
+                |                            | scanner
+  Crossword     | 1825 minis (5.0 yrs)       | 5x5 only. CSP fill over
+                |                            | 1349 hand-clued words.
+                |                            | Only 4 valid symmetric
+                |                            | grid patterns exist for
+                |                            | this word pool (found by
+                |                            | enumeration, not guessing)
+  Dot Dominoes  | 1825 puzzles (5.0 yrs)     | ORIGINAL ruleset (regions
+                |                            | with sum/same/different/
+                |                            | bound constraints) since
+                |                            | Pips has no public-domain
+                |                            | precedent to build from
+
+Total: 298 automated tests passing. `flutter analyze` clean (the ~24
+warnings that show are expected — they're Isar's own generated code using
+experimental APIs, not our code).
+
+INFRASTRUCTURE ALREADY BUILT:
+  - Deterministic daily-puzzle system: every install shows the same
+    puzzle on the same calendar date (device-local midnight rollover),
+    with zero backend/server. lib/core/daily_seed/daily_seed.dart
+  - Local persistence via Isar (community fork — see section 6 for why)
+    for streaks, stats, per-game history
+  - Original branding: app icon (generated by tool/gen_app_icon.py — four
+    shapes on a 2x2 grid, deliberately NOT a crossword-square icon),
+    branded splash screen, original teal/amber/cream colour palette,
+    original typography
+  - Home screen ("hub"): a bento-style layout — one rotating featured
+    card + a two-column mosaic, each game with its own accent colour and
+    a hand-drawn glyph depicting its actual board (lib/hub/game_glyph.dart)
+    rather than a generic icon
+  - AdMob banner ad wired in (lib/core/ads/) — CURRENTLY USES GOOGLE'S
+    PUBLIC TEST AD UNIT IDs, earns nothing until swapped for real ones
+  - In-app purchase "remove ads" flow with restore-purchases
+    (lib/core/iap/entitlements.dart) — product ID must be created in Play
+    Console as exactly "allways_remove_ads"
+  - Settings screen exposing purchase/restore
+  - Release signing config wired (see section 0)
+  - ProGuard rules that fix a real crash: AdMob pulls in WorkManager,
+    which builds its database via reflection, and R8 strips it in release
+    builds without explicit keep rules (android/app/proguard-rules.pro)
+
+BUILD ARTIFACTS: dist/allways-games-1.0.0.apk and .aab are committed to
+the repo, but BOTH ARE DEBUG-SIGNED (this predates having a real key).
+Rebuild after creating the keystore — do not upload these to Play.
+
+================================================================================
+4. WHAT'S NOT DONE — REMAINING WORK
+================================================================================
+
+A. BLOCKING FOR PLAY STORE LAUNCH (all require accounts this AI session
+   does not have access to):
+
+   1. Real AdMob account + ad unit IDs
+      - Create app in AdMob console (apps.admob.com)
+      - Create a banner unit and an interstitial unit
+      - Put both IDs into lib/core/ads/ad_config.dart (_prodBanner,
+        _prodInterstitial)
+      - Put the AdMob APP ID into
+        android/app/src/main/AndroidManifest.xml, replacing the
+        placeholder ca-app-pub-3940256099942544~3347511713
+      - IMPORTANT: a wrong/missing AdMob app ID in the manifest CRASHES
+        THE APP ON LAUNCH in production. This is not optional.
+      - AdConfig.usingTestUnits returns true (uses test ads) until the
+        real IDs replace the placeholder — this is deliberate, so nobody
+        accidentally serves real ads from a dev build and gets the AdMob
+        account flagged for invalid traffic.
+
+   2. Real release keystore — see section 0.
+
+   3. Privacy policy hosted at a public URL
+      - store/privacy-policy.md is fully written
+      - Replace YOUR_CONTACT_EMAIL with a real monitored address
+      - Host it (GitHub Pages is free and simple)
+      - Paste the URL into Play Console's store listing
+
+   4. In-app purchase product created in Play Console
+      - Product ID must be EXACTLY: allways_remove_ads
+      - Must be ACTIVATED, not just created, or purchases silently fail
+
+   5. Play Console paperwork (all manual, in the Console):
+      - Data Safety form (declare AdMob's ad ID + diagnostics collection,
+        and Play Billing's purchase data — must match the privacy policy)
+      - Content rating questionnaire (IARC) — should rate low/Everyone
+      - Target audience: general audience, NOT children
+      - "Contains ads" declaration: yes
+      - Store listing assets: feature graphic (1024x500) still needed;
+        app icon (512px) already exists at store/play_store_icon.png;
+        screenshots need to be taken from a real device running each game
+      - Closed testing track: Google requires new developer accounts to
+        run a closed test with 12+ testers for 14+ continuous days before
+        production access. VERIFY the current exact requirement at
+        submission time — Google adjusts these periodically. This is a
+        WALL-CLOCK wait, start it as early as possible, it is usually the
+        actual bottleneck to launch, not remaining engineering work.
+
+   Full detail on all of the above: store/RELEASE_CHECKLIST.md
+
+B. GENUINE PRODUCT/CONTENT GAPS (not blocking launch, but real):
+
+   1. Groups content depth. Only 60 puzzles are hand-authored; the
+      remaining 670 (of 730 total) are algorithmically COMPOSED by
+      recombining those 60 puzzles' 240 categories in new sets of four.
+      This works and passes validation (no word appears in two categories
+      of a composed puzzle), BUT composed puzzles are flatter than
+      authored ones — an authored puzzle deliberately picks categories
+      that bait each other (e.g. stage-lighting equipment next to
+      "___LIGHT" compound words); a composed one can't do that by design.
+      There is also a known edge case: a word's "other senses" were
+      annotated against its ORIGINAL puzzle, so a composed pairing can
+      occasionally put two categories together that were never checked
+      against each other for ambiguity (found one example during
+      testing: FRAME landed in a "___WORK" group next to a beekeeping
+      group where FRAME is also genuine beekeeping equipment). This is
+      not a bug in the strict sense — every composed puzzle still passes
+      its internal-consistency validator — but it is a real quality
+      ceiling. THE FIX: author more Groups puzzles by hand. Doable in
+      batches by an LLM (with a human/second-pass review for ambiguity)
+      at roughly 25-30 per working session. Getting to ~365 authored
+      (1 year, no composition needed) would meaningfully raise the floor.
+      Generator: tool/gen_groups_bank.dart. Source data:
+      tool/data/groups_puzzles.json (add batches here, following its
+      documented format).
+
+   2. Full-size (15x15) Crossword does not exist — only the 5x5 mini.
+      A 15x15 needs a much larger clued-word vocabulary (currently 1349
+      words total across 3/4/5-letter files) and is a materially harder
+      constraint-satisfaction problem. Treat as a separate, larger effort
+      if pursued — do NOT attempt it with the current word pool, it will
+      not fill.
+
+   3. Honeycomb's content generator (tool/gen_honeycomb_bank.dart) hits a
+      hard ceiling around 1700-1750 days because it runs out of
+      qualifying 7-letter-set candidates from the underlying word list at
+      the "must contain a real pangram, must yield 20-40+ answer words"
+      quality bar. To extend past that, the fix is loosening the
+      candidate-acceptance criteria slightly or drawing from a larger
+      base dictionary — do not just lower the day count requirement, that
+      papers over the actual constraint.
+
+   4. No iOS build has ever been attempted, though the domain/business
+      logic layer (everything under lib/*/domain/) has zero Flutter
+      dependencies specifically so this would be tractable later. All UI
+      (presentation/) and platform wiring (ads, IAP, persistence) would
+      need iOS-side work and is untested there.
+
+   5. AdMob interstitial ads are configured (AdConfig.puzzlesPerInterstitial
+      = 3) but NOT YET WIRED into any game's completion flow — only the
+      banner is actually shown anywhere in the UI right now. Decide if/
+      how interstitials get triggered (e.g. after every 3rd puzzle
+      completed) and wire it in lib/core/ads/ if you want that revenue
+      stream active.
+
+   6. No analytics of any kind are wired in. You have zero visibility
+      into retention, which games are played most, day-1/day-7 retention,
+      etc. once this ships. Consider adding a privacy-conscious analytics
+      SDK before or shortly after launch if you want to make data-driven
+      decisions about which of the 9 games to invest further content into.
+
+================================================================================
+5. ARCHITECTURE — HOW TO FIND YOUR WAY AROUND
+================================================================================
+
+    lib/
+      main.dart                    — entry point, AdMob init
+      app/
+        app.dart                   — MaterialApp root
+        theme/                     — colors.dart, typography.dart, theme.dart
+      core/                        — shared across ALL games
+        daily_seed/                — the date -> dayIndex -> puzzle system
+        content/                   — (see generation/ under each game instead;
+                                      this may be near-empty, banks are loaded
+                                      per-game)
+        persistence/
+          puzzle_completion.dart   — the ONE shared Isar collection every
+                                      game's stats read/write, keyed by
+                                      (gameId, dayIndex)
+          isar_provider.dart       — opens the shared Isar DB; a game with
+                                      its own extra collection (Honeycomb has
+                                      one, for in-progress rank/score) adds
+                                      it to the schema list here
+          streak.dart              — pure streak-counting logic, shared
+        ads/                       — AdMob wrapper, ad_config.dart (unit IDs)
+        iap/                       — in_app_purchase wrapper, entitlements
+      hub/                         — home screen
+        home_screen.dart           — the bento layout
+        game_catalog.dart          — THE SINGLE SOURCE OF TRUTH for which
+                                      games exist, their display name,
+                                      tagline, accent colour, and
+                                      enabled/disabled state. To add a new
+                                      game to the hub, add an entry here.
+        game_glyph.dart            — hand-drawn CustomPainter glyphs per game
+        settings_screen.dart
+      games/
+        <game_id>/
+          domain/                  — PURE DART, zero Flutter imports. Game
+                                      rules, board models, solvers,
+                                      generators. This is what's unit tested
+                                      and what would port to iOS/web/backend
+                                      unchanged.
+          generation/              — loads the pre-built content bank
+                                      (assets/content/<game>/bank.json) at
+                                      runtime and does the day-index lookup
+          data/                    — per-game stats repository wrapping the
+                                      shared Isar collection
+          presentation/            — Flutter widgets, Riverpod providers,
+                                      the actual screen
+      shared_game_kit/             — genuinely reused UI across games
+        grid/puzzle_grid.dart      — generic square-grid renderer (Sudoku,
+                                      Crossword, Weave's letter grid, etc.
+                                      all build on this)
+        keyboard/on_screen_keyboard.dart — shared QWERTY input (Five,
+                                      Crossword)
+        share_card/share_card.dart — builds the "share your result" text,
+                                      original emoji scheme (NOT Wordle's
+                                      green/yellow squares)
+        clock/puzzle_clock.dart    — shared elapsed-time formatting
+
+    tool/                          — OFFLINE content generators, run with
+                                      `dart run tool/gen_<game>_bank.dart
+                                      [--days=N]`. These are NOT shipped in
+                                      the app — they produce the
+                                      assets/content/<game>/bank.json files
+                                      that ARE shipped. Every generator:
+                                        - is deterministic (fixed/per-day
+                                          seed) so re-running with a larger
+                                          --days never changes puzzles
+                                          already published for earlier days
+                                        - self-validates every puzzle before
+                                          writing it (checks solvability,
+                                          uniqueness where applicable, that
+                                          every constraint is genuinely
+                                          satisfiable, etc.)
+      data/                        — source data generators read: ENABLE1
+                                      word list, Norvig frequency data
+                                      (both public domain), hand-authored
+                                      JSON files (crossword clues, Groups
+                                      puzzles, Weave themes)
+      gen_app_icon.py              — regenerates the app icon at all
+                                      densities + the 512px store icon
+
+    assets/content/<game>/bank.json — the SHIPPED, pre-generated puzzle
+                                      banks. These are committed to the
+                                      repo (they're the actual product
+                                      content) — do not regenerate them
+                                      casually, since that could shift
+                                      which puzzle appears on which date
+                                      for anyone who already has the app
+                                      installed, unless you're certain the
+                                      generator's seed logic makes that safe
+                                      (it's designed to be safe for
+                                      EXTENDING --days, not for arbitrary
+                                      re-runs with different generator code)
+
+    test/games/<game>/             — unit tests, mirrors lib/games/<game>/
+                                      structure. Bank tests
+                                      (*_bank_test.dart) re-validate the
+                                      ACTUAL SHIPPED JSON FILES, not just
+                                      the generator logic — these are the
+                                      tests to run after touching any
+                                      bank.json by hand or regenerating one.
+
+    store/                         — everything Play Store related:
+      RELEASE_CHECKLIST.md         — the full pre-launch checklist
+      privacy-policy.md            — ready to host, needs your email
+      listing.md                   — draft app name/description/ASO copy
+      play_store_icon.png          — 512x512 store icon
+
+WHY THIS SHAPE: every game module is self-contained and structured
+identically (domain/generation/data/presentation), which means the
+pattern for game #1 (Five) is the same pattern for game #9 (Dot
+Dominoes). If you add a 10th game, copy an existing game's folder
+structure as a template rather than inventing a new shape.
+
+================================================================================
+6. KNOWN GOTCHAS — THINGS THAT WILL BITE YOU IF YOU DON'T KNOW THEM
+================================================================================
+
+1. DO NOT use the `isar` / `isar_flutter_libs` packages (note: no
+   "_community" suffix). They are ABANDONED upstream (archived since
+   2023) and their Android build.gradle predates the namespace
+   requirement in current Android Gradle Plugin versions — a release
+   build will fail to configure. This project uses `isar_community` /
+   `isar_community_flutter_libs` (an actively maintained fork with an
+   otherwise identical API) specifically because of this. If you ever see
+   a stray `import 'package:isar/isar.dart'` anywhere, that's a bug —
+   it should be `package:isar_community/isar.dart`.
+
+2. google_mobile_ads MUST be a recent version (project currently pins
+   ^9.1.0). Version 5.x fails to configure against current Gradle with a
+   cryptic "Could not get unknown property 'all'" error.
+
+3. Any release build that includes google_mobile_ads WILL CRASH ON
+   LAUNCH unless android/app/proguard-rules.pro is applied. AdMob pulls
+   in WorkManager, which builds its Room database via reflection; R8's
+   default rules strip the generated implementation because there's no
+   direct code reference to it. The existing proguard-rules.pro already
+   has the necessary `-keep` rules — do not remove them, and if you add
+   other reflection-heavy libraries later, expect to need similar keeps.
+
+4. The keyboard widget (shared_game_kit/keyboard/on_screen_keyboard.dart)
+   deliberately pads 22px below the bottom row. This was a real user
+   complaint fixed in this session — without it, the ENTER key sits
+   directly on the Android gesture-navigation bar, making it both hard to
+   tap accurately and easy to accidentally trigger a back-swipe instead.
+   Don't "clean up" that padding without understanding why it's there.
+
+5. Content bank JSON files use short/compact keys (e.g. "n", "d", "c" in
+   Crossword's entries) rather than descriptive ones. This is deliberate
+   file-size optimization, not sloppiness — see each domain model's
+   fromJson/toJson for what the abbreviations mean before touching the
+   format.
+
+6. The daily-seed epoch (lib/core/daily_seed/daily_seed.dart,
+   DailySeed.epoch = DateTime(2024, 1, 1)) must NEVER change once any
+   version of the app is in a real user's hands. Changing it reshuffles
+   which puzzle every single user sees on every single date. It's set to
+   predate any real launch specifically so there's a large backlog of
+   "past" dates available for an archive/calendar feature if one gets
+   built later.
+
+7. Regenerating a bank.json with the SAME generator code and a LARGER
+   --days value is safe (per-day seeding guarantees earlier days don't
+   change). Regenerating with DIFFERENT generator code, a different word
+   list, or a different seed constant is NOT safe once the app has real
+   users — it silently changes what puzzle appears on already-elapsed
+   dates for anyone who's played them, which breaks any archive feature
+   and can make a player's saved streak reference a puzzle that no longer
+   matches what's stored.
+
+8. `flutter analyze` will always show ~24 warnings about
+   `experimental_member_use` in `*.g.dart` files. These are Isar's own
+   generated code, not project code, and are expected/harmless. Don't
+   chase them to zero; that's not a signal anything is wrong.
+
+================================================================================
+7. HOW TO GET RUNNING FROM SCRATCH
+================================================================================
+
+    git clone https://github.com/avirusai1/allways-games.git
+    cd allways-games
+    flutter pub get
+    dart run build_runner build --delete-conflicting-outputs
+    flutter test                          # should show ~298 passing
+    flutter analyze                       # should show ~24 warnings, 0 errors
+
+    # For a real device/emulator test run:
+    flutter run --release
+
+    # To rebuild content banks (rarely needed — see section 6, gotcha 7):
+    dart run tool/gen_<game>_bank.dart --days=1825
+
+    # To regenerate the app icon after a branding change:
+    python3 tool/gen_app_icon.py
+
+    # Release build (only works correctly once key.properties exists,
+    # see section 0 — otherwise falls back to debug signing):
+    flutter build appbundle --release      # -> Play Store upload
+    flutter build apk --release            # -> sideload testing
+
+REQUIRES: Flutter SDK, Android SDK, Java 17, Python 3 with Pillow
+(`pip install pillow`) for the icon generator only.
+
+================================================================================
+8. MARKETING NOTES — WHAT'S TRUE, WHAT TO SAY, WHAT NOT TO SAY
+================================================================================
+
+WHAT'S GENUINELY TRUE AND FAIR TO SAY:
+  - 9 original daily puzzle games in one app
+  - Years of unique content per game (4-5 years for most; Groups is the
+    honest exception at 2 years — see section 4A)
+  - Fully offline, no account required, no data collection beyond what
+    AdMob/Play Billing themselves require
+  - One-time purchase removes ads permanently
+  - Original branding and puzzle content, built from scratch
+
+DO NOT SAY (see section 2 for the legal reasoning):
+  - Any comparison naming a specific NYT/other-company product
+  - "Same as [X] but free" / "[X] alternative" framing that uses their
+    trademark as the hook
+  - Anything implying affiliation, endorsement, or that this is a
+    replacement/import of another company's specific puzzles
+
+ASO / KEYWORDS: target generic category terms — "daily word game",
+"sudoku", "crossword puzzle", "brain games", "word puzzle app" — not
+competitor brand names. Using a competitor's trademark as an App
+Store/Play Store keyword is both against most platforms' policies and
+adds real trademark-infringement exposure with no corresponding legal
+protection the way, say, comparative advertising sometimes has.
+
+SCREENSHOTS: take fresh ones from a real device for the actual current
+build before submission — do not reuse any screenshot generated during
+earlier development, since the UI has changed multiple times (hub layout
+alone went through three iterations). store/listing.md has a suggested
+shot list (hub, then one mid-play screenshot per game, roughly).
+
+CONTENT-DEPTH HONESTY: if remaining/future engineering effort goes into
+one thing before a marketing push, make it Groups' authored-puzzle count
+(section 4B.1) — it's the one place a description like "years of unique
+puzzles" is least true today (2 years vs 4-5 for the others), and it's a
+pure content-authoring task, not a hard engineering problem.
+
+================================================================================
+9. WHO TO ASK / WHERE THINGS LIVE
+================================================================================
+
+  Repo:              https://github.com/avirusai1/allways-games (private)
+  Google Play:        not yet created — no developer account tied to this
+                       app has been set up by prior sessions
+  AdMob:               not yet created — see section 4A.1
+  Signing keystore:    does not exist — see section 0
+  Domain expert on
+  the codebase:        no human — this was built end-to-end across
+                       several Claude Code sessions. The commit history
+                       (`git log`) has genuinely detailed commit messages
+                       explaining the reasoning behind non-obvious
+                       decisions (e.g. why isar_community over isar, why
+                       only 4 crossword grid patterns exist, why Groups
+                       composition has the flaw it has) — read commit
+                       messages, not just diffs, when you need the "why"
+                       behind something.
+
+END OF HANDOVER
