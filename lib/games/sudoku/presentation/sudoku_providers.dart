@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/daily_seed/daily_seed.dart';
 import '../../../core/persistence/isar_provider.dart';
+import '../../../core/stats/free_play_stats.dart';
 import '../data/sudoku_stats_repository.dart';
 import '../domain/sudoku_board.dart';
 import '../domain/sudoku_game_state.dart';
@@ -24,35 +26,53 @@ final sudokuStatsProvider = FutureProvider<SudokuGameStats>((ref) async {
   return repo.loadStats();
 });
 
-/// Drives one day's Sudoku: cell selection, digit entry, pencil notes, the
-/// play timer, and persisting the result on completion.
-class SudokuGameController extends AsyncNotifier<SudokuGameState> {
+final sudokuFreePlayStatsProvider = FutureProvider<FreePlayStats>((ref) async {
+  final prefs = await ref.watch(sharedPreferencesProvider.future);
+  return FreePlayStats('sudoku', prefs);
+});
+
+/// Drives Sudoku as free play: the player picks a difficulty, solves as
+/// many puzzles of it as they like, and can switch difficulty at any time.
+///
+/// [state] is null while no puzzle is active — the screen reads that as
+/// "show the difficulty picker" rather than modelling picker-vs-playing as
+/// two separate provider types.
+class SudokuGameController extends AsyncNotifier<SudokuGameState?> {
+  late SudokuContentBank _bank;
   late SudokuStatsRepository _stats;
-  late int _dayIndex;
+  late FreePlayStats _freePlayStats;
+  final Random _random = Random();
+  SudokuPuzzle? _lastPuzzle;
   Timer? _timer;
 
   @override
-  Future<SudokuGameState> build() async {
-    final bank = await ref.watch(sudokuContentBankProvider.future);
+  Future<SudokuGameState?> build() async {
+    _bank = await ref.watch(sudokuContentBankProvider.future);
     _stats = await ref.watch(sudokuStatsRepositoryProvider.future);
-    _dayIndex = DailySeed.todayIndex();
-    final puzzle = bank.puzzleForDayIndex(_dayIndex);
-
+    _freePlayStats = await ref.watch(sudokuFreePlayStatsProvider.future);
     ref.onDispose(() => _timer?.cancel());
+    return null; // No difficulty chosen yet.
+  }
 
-    final existing = await _stats.completionForDay(_dayIndex);
-    if (existing != null && existing.won) {
-      // Already solved today: show the completed board rather than a
-      // partially-filled one (per-cell progress isn't persisted in v1).
-      return SudokuGameState.initial(puzzle).copyWith(
-        entries: List<int>.from(puzzle.solution),
-        status: SudokuStatus.solved,
-        elapsedSeconds: existing.elapsedSeconds ?? 0,
-      );
-    }
+  /// Starts a fresh puzzle of [difficulty], drawn at random from the bank.
+  void selectDifficulty(SudokuDifficulty difficulty) {
+    final pool = _bank.puzzlesOfDifficulty(difficulty);
+    if (pool.isEmpty) return;
+
+    SudokuPuzzle puzzle;
+    do {
+      puzzle = pool[_random.nextInt(pool.length)];
+    } while (identical(puzzle, _lastPuzzle) && pool.length > 1);
+    _lastPuzzle = puzzle;
 
     _startTimer();
-    return SudokuGameState.initial(puzzle);
+    state = AsyncData(SudokuGameState.initial(puzzle));
+  }
+
+  /// Back to the difficulty picker without recording anything.
+  void changeDifficulty() {
+    _timer?.cancel();
+    state = const AsyncData(null);
   }
 
   void _startTimer() {
@@ -69,11 +89,12 @@ class SudokuGameController extends AsyncNotifier<SudokuGameState> {
   void selectCell(int index) {
     final current = state.valueOrNull;
     if (current == null || !current.isPlaying) return;
-    state = AsyncData(
-      current.selectedIndex == index
-          ? current.copyWith(clearSelection: true)
-          : current.copyWith(selectedIndex: index),
-    );
+
+    if (current.selectedIndex == index) {
+      state = AsyncData(current.copyWith(clearSelection: true));
+      return;
+    }
+    state = AsyncData(current.copyWith(selectedIndex: index));
   }
 
   void toggleNotesMode() {
@@ -127,12 +148,21 @@ class SudokuGameController extends AsyncNotifier<SudokuGameState> {
     state = AsyncData(
       solvedState.copyWith(status: SudokuStatus.solved, clearSelection: true),
     );
+
+    // Streak is still "did you play today", independent of how many
+    // puzzles that was — free play removes the one-per-day cap, not the
+    // reason to come back daily.
     await _stats.recordCompletion(
-      dayIndex: _dayIndex,
+      dayIndex: DailySeed.todayIndex(),
       won: true,
       elapsedSeconds: solvedState.elapsedSeconds,
     );
+    await _freePlayStats.recordSolve(
+      solvedState.puzzle.difficulty.name,
+      solvedState.elapsedSeconds,
+    );
     ref.invalidate(sudokuStatsProvider);
+    ref.invalidate(sudokuFreePlayStatsProvider);
   }
 
   static List<Set<int>> _copyNotes(List<Set<int>> notes) =>
@@ -140,6 +170,6 @@ class SudokuGameController extends AsyncNotifier<SudokuGameState> {
 }
 
 final sudokuGameControllerProvider =
-    AsyncNotifierProvider<SudokuGameController, SudokuGameState>(
+    AsyncNotifierProvider<SudokuGameController, SudokuGameState?>(
   SudokuGameController.new,
 );

@@ -5,12 +5,36 @@ import '../../../app/theme/colors.dart';
 import '../../../core/daily_seed/daily_seed.dart';
 import '../../../core/persistence/streak.dart';
 import '../../../shared_game_kit/clock/puzzle_clock.dart';
+import '../../../shared_game_kit/difficulty/difficulty_picker.dart';
 import '../../../shared_game_kit/share_card/share_card.dart';
+import '../../../core/stats/free_play_stats.dart';
+import '../data/domino_stats_repository.dart';
 import '../domain/domino_board.dart';
 import '../domain/domino_game_state.dart';
 import 'domino_providers.dart';
 import 'widgets/domino_board_view.dart';
 import 'widgets/pip_face.dart';
+
+const List<DifficultyOption<int>> _difficultyOptions = [
+  DifficultyOption(
+    value: 3,
+    label: 'Easy',
+    description: '3 dominoes, a gentle start',
+    icon: Icons.sentiment_satisfied_outlined,
+  ),
+  DifficultyOption(
+    value: 4,
+    label: 'Medium',
+    description: '4 dominoes, more to juggle',
+    icon: Icons.sentiment_neutral_outlined,
+  ),
+  DifficultyOption(
+    value: 5,
+    label: 'Hard',
+    description: '5 dominoes, every region matters',
+    icon: Icons.local_fire_department_outlined,
+  ),
+];
 
 class DominoScreen extends ConsumerStatefulWidget {
   const DominoScreen({super.key});
@@ -48,15 +72,29 @@ class _DominoScreenState extends ConsumerState<DominoScreen> {
         title: const Text('Dot Dominoes'),
         actions: [
           asyncState.maybeWhen(
-            data: (state) => Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: Center(
-                child: Text(
-                  formatPuzzleClock(state.elapsedSeconds),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-            ),
+            data: (state) => state == null
+                ? const SizedBox.shrink()
+                : Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: Center(
+                      child: Text(
+                        formatPuzzleClock(state.elapsedSeconds),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                  ),
+            orElse: () => const SizedBox.shrink(),
+          ),
+          asyncState.maybeWhen(
+            data: (state) => state == null
+                ? const SizedBox.shrink()
+                : IconButton(
+                    tooltip: 'Change difficulty',
+                    icon: const Icon(Icons.tune),
+                    onPressed: () => ref
+                        .read(dominoGameControllerProvider.notifier)
+                        .changeDifficulty(),
+                  ),
             orElse: () => const SizedBox.shrink(),
           ),
         ],
@@ -65,16 +103,22 @@ class _DominoScreenState extends ConsumerState<DominoScreen> {
         child: asyncState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, _) =>
-              Center(child: Text("Could not load today's puzzle: $err")),
-          data: (state) => _Body(
-            state: state,
-            pendingCell: _pendingCell,
-            onCellTap: (cell) => _handleCellTap(state, cell),
-            onClear: () {
-              setState(() => _pendingCell = null);
-              ref.read(dominoGameControllerProvider.notifier).clearBoard();
-            },
-          ),
+              Center(child: Text('Could not load Dot Dominoes: $err')),
+          data: (state) => state == null
+              ? _DifficultyPickerBody(
+                  onSelect: (count) => ref
+                      .read(dominoGameControllerProvider.notifier)
+                      .selectDifficulty(count),
+                )
+              : _Body(
+                  state: state,
+                  pendingCell: _pendingCell,
+                  onCellTap: (cell) => _handleCellTap(state, cell),
+                  onClear: () {
+                    setState(() => _pendingCell = null);
+                    ref.read(dominoGameControllerProvider.notifier).clearBoard();
+                  },
+                ),
         ),
       ),
     );
@@ -128,6 +172,31 @@ class _DominoScreenState extends ConsumerState<DominoScreen> {
   }
 }
 
+class _DifficultyPickerBody extends ConsumerWidget {
+  const _DifficultyPickerBody({required this.onSelect});
+
+  final ValueChanged<int> onSelect;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final freePlay = ref.watch(dominoFreePlayStatsProvider);
+    final solvedCounts = freePlay.maybeWhen(
+      data: (stats) => {
+        for (final size in dominoDifficultyTiers)
+          size: stats.forDifficulty(size.toString()).solved,
+      },
+      orElse: () => const <int, int>{},
+    );
+
+    return DifficultyPicker<int>(
+      title: 'Choose a difficulty',
+      options: _difficultyOptions,
+      solvedCounts: solvedCounts,
+      onSelect: onSelect,
+    );
+  }
+}
+
 class _Body extends ConsumerWidget {
   const _Body({
     required this.state,
@@ -155,13 +224,13 @@ class _Body extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Fill the board so every region holds true',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  dominoDifficultyLabel(state.puzzle.tray.length),
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
               Text(
                 '$remaining left',
-                style: Theme.of(context).textTheme.titleMedium,
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
           ),
@@ -300,7 +369,8 @@ class _ResultSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statsAsync = ref.watch(dominoStatsProvider);
-    final dayIndex = DailySeed.todayIndex();
+    final freePlayAsync = ref.watch(dominoFreePlayStatsProvider);
+    final dominoCount = state.puzzle.tray.length;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
@@ -311,59 +381,109 @@ class _ResultSheet extends ConsumerWidget {
           Text('Solved!', style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: 4),
           Text(
-            '${state.puzzle.tray.length} dominoes placed in '
-            '${formatPuzzleClock(state.elapsedSeconds)}.',
+            '${dominoDifficultyLabel(dominoCount)} · $dominoCount dominoes '
+            'in ${formatPuzzleClock(state.elapsedSeconds)}.',
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 16),
-          statsAsync.when(
-            loading: () => const SizedBox.shrink(),
-            error: (_, _) => const SizedBox.shrink(),
-            data: (stats) {
-              final current =
-                  StreakCalculator.current(stats.wonDayIndices, dayIndex);
-              final longest = StreakCalculator.longest(stats.wonDayIndices);
-              return Row(
-                children: [
-                  _StatChip(
-                    label: 'Streak',
-                    value: '$current',
-                    icon: Icons.local_fire_department,
-                  ),
-                  const SizedBox(width: 12),
-                  _StatChip(
-                    label: 'Best',
-                    value: '$longest',
-                    icon: Icons.emoji_events_outlined,
-                  ),
-                  const SizedBox(width: 12),
-                  _StatChip(
-                    label: 'Fastest',
-                    value: stats.bestSeconds == null
-                        ? '—'
-                        : formatPuzzleClock(stats.bestSeconds!),
-                    icon: Icons.timer_outlined,
-                  ),
-                ],
-              );
-            },
+          _StatsRow(
+            statsAsync: statsAsync,
+            freePlayAsync: freePlayAsync,
+            dominoCount: dominoCount,
           ),
           const SizedBox(height: 20),
-          FilledButton.icon(
-            onPressed: () => ShareCard.share(
-              ShareCard.buildSummaryResultText(
-                appName: 'Allways Games',
-                gameName: 'Dot Dominoes',
-                dayIndex: dayIndex,
-                score: formatPuzzleClock(state.elapsedSeconds),
-                lines: ['${state.puzzle.tray.length} dominoes'],
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    ref
+                        .read(dominoGameControllerProvider.notifier)
+                        .selectDifficulty(dominoCount);
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Play another'),
+                ),
               ),
+              const SizedBox(width: 10),
+              OutlinedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  ref.read(dominoGameControllerProvider.notifier).changeDifficulty();
+                },
+                child: const Text('Change difficulty'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton.icon(
+              onPressed: () => ShareCard.share(
+                ShareCard.buildSummaryResultText(
+                  appName: 'Allways Games',
+                  gameName: 'Dot Dominoes',
+                  dayIndex: DailySeed.todayIndex(),
+                  score: formatPuzzleClock(state.elapsedSeconds),
+                  lines: ['$dominoCount dominoes'],
+                ),
+              ),
+              icon: const Icon(Icons.share_outlined, size: 18),
+              label: const Text('Share result'),
             ),
-            icon: const Icon(Icons.share_outlined),
-            label: const Text('Share result'),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _StatsRow extends StatelessWidget {
+  const _StatsRow({
+    required this.statsAsync,
+    required this.freePlayAsync,
+    required this.dominoCount,
+  });
+
+  final AsyncValue<DominoGameStats> statsAsync;
+  final AsyncValue<FreePlayStats> freePlayAsync;
+  final int dominoCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final streak = statsAsync.maybeWhen(
+      data: (stats) =>
+          StreakCalculator.current(stats.wonDayIndices, DailySeed.todayIndex()),
+      orElse: () => null,
+    );
+    final tier = freePlayAsync.maybeWhen(
+      data: (fp) => fp.forDifficulty(dominoCount.toString()),
+      orElse: () => null,
+    );
+
+    return Row(
+      children: [
+        _StatChip(
+          label: 'Streak',
+          value: streak == null ? '—' : '$streak',
+          icon: Icons.local_fire_department,
+        ),
+        const SizedBox(width: 12),
+        _StatChip(
+          label: 'Solved',
+          value: tier == null ? '—' : '${tier.solved}',
+          icon: Icons.check_circle_outline,
+        ),
+        const SizedBox(width: 12),
+        _StatChip(
+          label: 'Best',
+          value: tier?.bestSeconds == null
+              ? '—'
+              : formatPuzzleClock(tier!.bestSeconds!),
+          icon: Icons.timer_outlined,
+        ),
+      ],
     );
   }
 }

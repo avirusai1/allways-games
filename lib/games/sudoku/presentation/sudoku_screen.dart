@@ -4,9 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/daily_seed/daily_seed.dart';
 import '../../../core/persistence/streak.dart';
+import '../../../core/stats/free_play_stats.dart';
 import '../../../shared_game_kit/clock/puzzle_clock.dart';
+import '../../../shared_game_kit/difficulty/difficulty_picker.dart';
 import '../../../shared_game_kit/grid/puzzle_grid.dart';
 import '../../../shared_game_kit/share_card/share_card.dart';
+import '../data/sudoku_stats_repository.dart';
 import '../domain/sudoku_board.dart';
 import '../domain/sudoku_game_state.dart';
 import 'sudoku_providers.dart';
@@ -16,6 +19,27 @@ import 'widgets/sudoku_cell.dart';
 /// Sudoku's clock is the app's shared puzzle clock; kept as a named
 /// alias so the screen reads in its own terms.
 String formatDuration(int totalSeconds) => formatPuzzleClock(totalSeconds);
+
+const List<DifficultyOption<SudokuDifficulty>> _difficultyOptions = [
+  DifficultyOption(
+    value: SudokuDifficulty.easy,
+    label: 'Easy',
+    description: 'A relaxed grid to warm up on',
+    icon: Icons.sentiment_satisfied_outlined,
+  ),
+  DifficultyOption(
+    value: SudokuDifficulty.medium,
+    label: 'Medium',
+    description: 'A fair, steady challenge',
+    icon: Icons.sentiment_neutral_outlined,
+  ),
+  DifficultyOption(
+    value: SudokuDifficulty.hard,
+    label: 'Hard',
+    description: 'Sparse givens, real deduction',
+    icon: Icons.local_fire_department_outlined,
+  ),
+];
 
 class SudokuScreen extends ConsumerWidget {
   const SudokuScreen({super.key});
@@ -38,15 +62,29 @@ class SudokuScreen extends ConsumerWidget {
         title: const Text('Sudoku'),
         actions: [
           asyncState.maybeWhen(
-            data: (state) => Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: Center(
-                child: Text(
-                  formatDuration(state.elapsedSeconds),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-            ),
+            data: (state) => state == null
+                ? const SizedBox.shrink()
+                : Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: Center(
+                      child: Text(
+                        formatDuration(state.elapsedSeconds),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                  ),
+            orElse: () => const SizedBox.shrink(),
+          ),
+          asyncState.maybeWhen(
+            data: (state) => state == null
+                ? const SizedBox.shrink()
+                : IconButton(
+                    tooltip: 'Change difficulty',
+                    icon: const Icon(Icons.tune),
+                    onPressed: () => ref
+                        .read(sudokuGameControllerProvider.notifier)
+                        .changeDifficulty(),
+                  ),
             orElse: () => const SizedBox.shrink(),
           ),
         ],
@@ -54,9 +92,14 @@ class SudokuScreen extends ConsumerWidget {
       body: SafeArea(
         child: asyncState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) =>
-              Center(child: Text("Could not load today's puzzle: $err")),
-          data: (state) => _SudokuBody(state: state),
+          error: (err, _) => Center(child: Text('Could not load Sudoku: $err')),
+          data: (state) => state == null
+              ? _DifficultyPickerBody(
+                  onSelect: (d) => ref
+                      .read(sudokuGameControllerProvider.notifier)
+                      .selectDifficulty(d),
+                )
+              : _SudokuBody(state: state),
         ),
       ),
     );
@@ -70,6 +113,31 @@ class SudokuScreen extends ConsumerWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (_) => _ResultSheet(state: state),
+    );
+  }
+}
+
+class _DifficultyPickerBody extends ConsumerWidget {
+  const _DifficultyPickerBody({required this.onSelect});
+
+  final ValueChanged<SudokuDifficulty> onSelect;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final freePlay = ref.watch(sudokuFreePlayStatsProvider);
+    final solvedCounts = freePlay.maybeWhen(
+      data: (stats) => {
+        for (final d in SudokuDifficulty.values)
+          d: stats.forDifficulty(d.name).solved,
+      },
+      orElse: () => const <SudokuDifficulty, int>{},
+    );
+
+    return DifficultyPicker<SudokuDifficulty>(
+      title: 'Choose a difficulty',
+      options: _difficultyOptions,
+      solvedCounts: solvedCounts,
+      onSelect: onSelect,
     );
   }
 }
@@ -146,7 +214,8 @@ class _ResultSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statsAsync = ref.watch(sudokuStatsProvider);
-    final dayIndex = DailySeed.todayIndex();
+    final freePlayAsync = ref.watch(sudokuFreePlayStatsProvider);
+    final difficulty = state.puzzle.difficulty;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
@@ -157,57 +226,102 @@ class _ResultSheet extends ConsumerWidget {
           Text('Solved!', style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: 4),
           Text(
-            '${state.puzzle.difficulty.label} in '
-            '${formatDuration(state.elapsedSeconds)}.',
+            '${difficulty.label} in ${formatDuration(state.elapsedSeconds)}.',
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 16),
-          statsAsync.when(
-            loading: () => const SizedBox.shrink(),
-            error: (_, _) => const SizedBox.shrink(),
-            data: (stats) {
-              final current =
-                  StreakCalculator.current(stats.wonDayIndices, dayIndex);
-              final longest = StreakCalculator.longest(stats.wonDayIndices);
-              return Row(
-                children: [
-                  _StatChip(
-                    label: 'Streak',
-                    value: '$current',
-                    icon: Icons.local_fire_department,
-                  ),
-                  const SizedBox(width: 12),
-                  _StatChip(
-                    label: 'Best',
-                    value: '$longest',
-                    icon: Icons.emoji_events_outlined,
-                  ),
-                  const SizedBox(width: 12),
-                  _StatChip(
-                    label: 'Fastest',
-                    value: stats.bestSeconds == null
-                        ? '—'
-                        : formatDuration(stats.bestSeconds!),
-                    icon: Icons.timer_outlined,
-                  ),
-                ],
-              );
-            },
-          ),
+          _StatsRow(statsAsync: statsAsync, freePlayAsync: freePlayAsync, difficulty: difficulty),
           const SizedBox(height: 20),
-          FilledButton.icon(
-            onPressed: () => ShareCard.share(
-              'Allways Games Sudoku #$dayIndex\n'
-              '${state.puzzle.difficulty.label} · '
-              '${formatDuration(state.elapsedSeconds)}',
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    ref
+                        .read(sudokuGameControllerProvider.notifier)
+                        .selectDifficulty(difficulty);
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Play another'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              OutlinedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  ref.read(sudokuGameControllerProvider.notifier).changeDifficulty();
+                },
+                child: const Text('Change difficulty'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton.icon(
+              onPressed: () => ShareCard.share(
+                'Allways Games Sudoku\n'
+                '${difficulty.label} · ${formatDuration(state.elapsedSeconds)}',
+              ),
+              icon: const Icon(Icons.share_outlined, size: 18),
+              label: const Text('Share result'),
             ),
-            icon: const Icon(Icons.share_outlined),
-            label: const Text('Share result'),
           ),
         ],
       ),
     );
   }
+}
+
+class _StatsRow extends StatelessWidget {
+  const _StatsRow({
+    required this.statsAsync,
+    required this.freePlayAsync,
+    required this.difficulty,
+  });
+
+  final AsyncValue<SudokuGameStats> statsAsync;
+  final AsyncValue<FreePlayStats> freePlayAsync;
+  final SudokuDifficulty difficulty;
+
+  @override
+  Widget build(BuildContext context) {
+    final streak = statsAsync.maybeWhen(
+      data: (stats) => StreakCalculator.current(
+        stats.wonDayIndices,
+        DailySeed.todayIndex(),
+      ),
+      orElse: () => null,
+    );
+    final tier = freePlayAsync.maybeWhen(
+      data: (fp) => fp.forDifficulty(difficulty.name),
+      orElse: () => null,
+    );
+
+    return Row(
+      children: [
+        _StatChip(
+          label: 'Streak',
+          value: streak == null ? '—' : '$streak',
+          icon: Icons.local_fire_department,
+        ),
+        const SizedBox(width: 12),
+        _StatChip(
+          label: 'Solved',
+          value: tier == null ? '—' : '${tier.solved}',
+          icon: Icons.check_circle_outline,
+        ),
+        const SizedBox(width: 12),
+        _StatChip(
+          label: 'Best',
+          value: tier?.bestSeconds == null ? '—' : formatDuration(tier!.bestSeconds!),
+          icon: Icons.timer_outlined,
+        ),
+      ],
+    );
+  }
+
 }
 
 class _StatChip extends StatelessWidget {

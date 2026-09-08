@@ -38,7 +38,7 @@ const List<GameCatalogEntry> gameCatalog = [
   GameCatalogEntry(
     id: 'sudoku',
     displayName: 'Sudoku',
-    tagline: 'Fill the grid, no repeats',
+    tagline: 'Pick a difficulty, play as many as you like',
     accent: Color(0xFF3D5A99),
     enabled: true,
   ),
@@ -87,7 +87,7 @@ const List<GameCatalogEntry> gameCatalog = [
   GameCatalogEntry(
     id: 'dot_dominoes',
     displayName: 'Dot Dominoes',
-    tagline: 'Place dominoes to fit each region',
+    tagline: 'Pick a difficulty, play as many as you like',
     accent: Color(0xFFA85434),
     enabled: true,
   ),

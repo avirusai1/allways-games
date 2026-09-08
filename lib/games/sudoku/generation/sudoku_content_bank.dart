@@ -31,4 +31,9 @@ class SudokuContentBank implements DailyPuzzleBank<SudokuPuzzle> {
 
   @override
   SudokuPuzzle puzzleForToday() => puzzleForDayIndex(DailySeed.todayIndex());
+
+  /// Every puzzle of [difficulty], for free play where the player picks a
+  /// tier up front rather than getting whatever today's calendar slot is.
+  List<SudokuPuzzle> puzzlesOfDifficulty(SudokuDifficulty difficulty) =>
+      _puzzles.where((p) => p.difficulty == difficulty).toList();
 }

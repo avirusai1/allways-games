@@ -32,4 +32,10 @@ class DominoContentBank implements DailyPuzzleBank<DominoPuzzle> {
 
   @override
   DominoPuzzle puzzleForToday() => puzzleForDayIndex(DailySeed.todayIndex());
+
+  /// Every puzzle with exactly [dominoCount] dominoes, for free play where
+  /// the player picks a tier up front rather than getting whatever today's
+  /// calendar slot happens to be.
+  List<DominoPuzzle> puzzlesOfSize(int dominoCount) =>
+      _puzzles.where((p) => p.tray.length == dominoCount).toList();
 }

@@ -14,6 +14,19 @@ const int dominoBoardCols = 5;
 const int dominoBoardRows = 5;
 const int dominoCellCount = dominoBoardCols * dominoBoardRows;
 
+/// Board sizes the bank ships, smallest (easiest) first.
+///
+/// The generator already varies difficulty by how many dominoes a board
+/// holds — more dominoes means more regions to satisfy at once — so this
+/// is a real tier, not a cosmetic label on identical content.
+const List<int> dominoDifficultyTiers = [3, 4, 5];
+
+String dominoDifficultyLabel(int dominoCount) => switch (dominoCount) {
+      3 => 'Easy',
+      4 => 'Medium',
+      _ => 'Hard',
+    };
+
 int dominoRowOf(int index) => index ~/ dominoBoardCols;
 int dominoColOf(int index) => index % dominoBoardCols;
 int dominoIndexAt(int row, int col) => row * dominoBoardCols + col;

@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/daily_seed/daily_seed.dart';
 import '../../../core/persistence/isar_provider.dart';
+import '../../../core/stats/free_play_stats.dart';
 import '../data/domino_stats_repository.dart';
 import '../domain/domino_game_state.dart';
+import '../domain/domino_puzzle.dart';
 import '../generation/domino_content_bank.dart';
 
 final dominoContentBankProvider = FutureProvider<DominoContentBank>((ref) {
@@ -23,30 +26,54 @@ final dominoStatsProvider = FutureProvider<DominoGameStats>((ref) async {
   return repo.loadStats();
 });
 
-class DominoGameController extends AsyncNotifier<DominoGameState> {
+final dominoFreePlayStatsProvider = FutureProvider<FreePlayStats>((ref) async {
+  final prefs = await ref.watch(sharedPreferencesProvider.future);
+  return FreePlayStats('dot_dominoes', prefs);
+});
+
+/// Drives Dot Dominoes as free play: the player picks a size/difficulty
+/// tier, solves as many puzzles of it as they like, and can switch tiers
+/// at any time.
+///
+/// [state] is null while no puzzle is active — the screen reads that as
+/// "show the difficulty picker".
+class DominoGameController extends AsyncNotifier<DominoGameState?> {
+  late DominoContentBank _bank;
   late DominoStatsRepository _stats;
-  late int _dayIndex;
+  late FreePlayStats _freePlayStats;
+  final Random _random = Random();
+  DominoPuzzle? _lastPuzzle;
   Timer? _timer;
 
   @override
-  Future<DominoGameState> build() async {
-    final bank = await ref.watch(dominoContentBankProvider.future);
+  Future<DominoGameState?> build() async {
+    _bank = await ref.watch(dominoContentBankProvider.future);
     _stats = await ref.watch(dominoStatsRepositoryProvider.future);
-    _dayIndex = DailySeed.todayIndex();
-    final puzzle = bank.puzzleForDayIndex(_dayIndex);
-
+    _freePlayStats = await ref.watch(dominoFreePlayStatsProvider.future);
     ref.onDispose(() => _timer?.cancel());
+    return null; // No difficulty chosen yet.
+  }
 
-    final existing = await _stats.completionForDay(_dayIndex);
-    if (existing != null && existing.won) {
-      return DominoGameState.initial(puzzle).copyWith(
-        placed: puzzle.solution,
-        elapsedSeconds: existing.elapsedSeconds ?? 0,
-      );
-    }
+  /// Starts a fresh puzzle with [dominoCount] dominoes, drawn at random
+  /// from the bank.
+  void selectDifficulty(int dominoCount) {
+    final pool = _bank.puzzlesOfSize(dominoCount);
+    if (pool.isEmpty) return;
+
+    DominoPuzzle puzzle;
+    do {
+      puzzle = pool[_random.nextInt(pool.length)];
+    } while (identical(puzzle, _lastPuzzle) && pool.length > 1);
+    _lastPuzzle = puzzle;
 
     _startTimer();
-    return DominoGameState.initial(puzzle);
+    state = AsyncData(DominoGameState.initial(puzzle));
+  }
+
+  /// Back to the difficulty picker without recording anything.
+  void changeDifficulty() {
+    _timer?.cancel();
+    state = const AsyncData(null);
   }
 
   void _startTimer() {
@@ -89,12 +116,21 @@ class DominoGameController extends AsyncNotifier<DominoGameState> {
 
   Future<void> _onSolved(DominoGameState solved) async {
     _timer?.cancel();
+
+    // Streak is still "did you play today", independent of how many
+    // puzzles that was — free play removes the one-per-day cap, not the
+    // reason to come back daily.
     await _stats.recordCompletion(
-      dayIndex: _dayIndex,
+      dayIndex: DailySeed.todayIndex(),
       won: true,
       elapsedSeconds: solved.elapsedSeconds,
     );
+    await _freePlayStats.recordSolve(
+      solved.puzzle.tray.length.toString(),
+      solved.elapsedSeconds,
+    );
     ref.invalidate(dominoStatsProvider);
+    ref.invalidate(dominoFreePlayStatsProvider);
   }
 
   void clearBoard() {
@@ -105,6 +141,6 @@ class DominoGameController extends AsyncNotifier<DominoGameState> {
 }
 
 final dominoGameControllerProvider =
-    AsyncNotifierProvider<DominoGameController, DominoGameState>(
+    AsyncNotifierProvider<DominoGameController, DominoGameState?>(
   DominoGameController.new,
 );
