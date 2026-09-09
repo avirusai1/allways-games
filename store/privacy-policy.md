@@ -1,15 +1,17 @@
 # Privacy Policy — Allways Games
 
-**Last updated: 27 August 2026**
+**Last updated: 9 September 2026**
 
 This policy explains what Allways Games ("the app") does with data. It is
 written to be accurate rather than reassuring: where data is collected, it
 says so.
 
-> **Before publishing:** replace `YOUR_CONTACT_EMAIL` below with a real
-> address you monitor, host this page at a public URL, and paste that URL
-> into the Play Console listing. Google requires a reachable privacy policy
-> link, and the listing is rejected without one.
+> **Before publishing:** host this page at a public URL (GitHub Pages is
+> free and works well) and paste that URL into the Play Console listing.
+> Google requires a reachable privacy policy link, and the listing is
+> rejected without one. The contact email below is filled in with the
+> address on this account — swap it for a dedicated support address if you
+> want one separate from your personal inbox.
 
 ---
 
@@ -87,4 +89,4 @@ Material changes will be noted in the app's release notes.
 
 ## Contact
 
-Questions about this policy: **YOUR_CONTACT_EMAIL**
+Questions about this policy: **abhishek.98av@gmail.com**

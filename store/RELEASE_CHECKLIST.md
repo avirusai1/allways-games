@@ -27,21 +27,16 @@ keep being used until you fill in the real ones. That is deliberate: real
 units firing during development get an AdMob account suspended for invalid
 traffic.
 
-### Release signing key
-The build is currently signed with the **debug key** (see the TODO in
-`android/app/build.gradle.kts`). Play will reject it.
-
-1. `keytool -genkey -v -keystore ~/allways-upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload`
-2. Create `android/key.properties` (and add it to `.gitignore` — it is a secret)
-3. Wire a `signingConfigs.release` block in `android/app/build.gradle.kts`
-4. Back the keystore up somewhere safe. Losing it means never being able to
-   update the app under the same listing.
+### Release signing key — ✅ done
+The build is signed with a real upload key (`android/key.properties`,
+gitignored; the `.jks` lives outside the repo). Every AAB/APK in `dist/`
+is verified via `apksigner` as `CN=Allways Games`, not debug.
 
 ### Privacy policy URL
-`store/privacy-policy.md` is written and ready. You need to:
-1. Replace `YOUR_CONTACT_EMAIL` with a real monitored address
-2. Host it at a public URL (GitHub Pages is fine and free)
-3. Paste that URL into the Play Console listing
+`store/privacy-policy.md` is written and ready, with a real contact email
+filled in. Still needed:
+1. Host it at a public URL (GitHub Pages is fine and free)
+2. Paste that URL into the Play Console listing
 
 ### In-app purchase product
 The code expects a product id of exactly `allways_remove_ads`
@@ -64,13 +59,12 @@ The code expects a product id of exactly `allways_remove_ads`
   shows ads and is not designed for under-13s.
 - **Ads declaration.** Tick "contains ads". Omitting it is a policy strike.
 
-## 3. Store listing assets
+## 3. Store listing assets — ✅ all done
 
-- App icon 512×512 — **done**, `store/play_store_icon.png`
-- Feature graphic 1024×500 — still needed
-- Phone screenshots, at least 2 (4–8 is better) — take from a real device
-- Short description (80 chars max) and full description (4000 max) — draft
-  in `store/listing.md`
+- App icon 512×512 — `store/play_store_icon.png`
+- Feature graphic 1024×500 — `store/screenshots/feature_graphic.png`
+- Phone screenshots (8) — `store/screenshots/`, taken on a real device
+- Short description and full description — `store/listing.md`
 
 ## 4. Testing track
 
@@ -104,3 +98,5 @@ Output: `build/app/outputs/bundle/release/app-release.aab`
   because R8 strips the WorkManager database AdMob reflects into
 - ✅ Package id locked to `com.techallways.games`
 - ✅ Minimal permissions: internet only
+- ✅ Real release signing key wired and verified (not debug)
+- ✅ Store listing text, screenshots, feature graphic, and icon
