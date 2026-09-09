@@ -14,6 +14,7 @@ class FiveGameState {
     required this.evaluations,
     required this.currentInput,
     required this.status,
+    this.restoredGuessesUsed,
   });
 
   factory FiveGameState.initial(String answer) => FiveGameState(
@@ -29,6 +30,22 @@ class FiveGameState {
   final List<List<LetterState>> evaluations;
   final String currentInput;
   final FiveStatus status;
+
+  /// Guesses used on a day reopened after it finished in an earlier app
+  /// session. The letter-by-letter grid isn't persisted (only the outcome
+  /// is), so [submittedGuesses] comes back empty on a cold reopen — this
+  /// carries the one number that *is* persisted, so the screen can still
+  /// say "solved in 3/6" instead of falling back to a misleading "0/6".
+  final int? restoredGuessesUsed;
+
+  /// True when this is a finished day reopened cold: no guesses are held
+  /// in memory to render as a grid, only the persisted outcome.
+  bool get isRestoredWithoutHistory =>
+      status != FiveStatus.playing && submittedGuesses.isEmpty;
+
+  /// Guesses used, whichever source has it.
+  int get guessesUsedForDisplay =>
+      submittedGuesses.isNotEmpty ? submittedGuesses.length : (restoredGuessesUsed ?? 0);
 
   bool get canEditInput => status == FiveStatus.playing;
   bool get canSubmit => currentInput.length == fiveWordLength && canEditInput;
@@ -64,6 +81,7 @@ class FiveGameState {
     List<List<LetterState>>? evaluations,
     String? currentInput,
     FiveStatus? status,
+    int? restoredGuessesUsed,
   }) {
     return FiveGameState(
       answer: answer,
@@ -71,6 +89,7 @@ class FiveGameState {
       evaluations: evaluations ?? this.evaluations,
       currentInput: currentInput ?? this.currentInput,
       status: status ?? this.status,
+      restoredGuessesUsed: restoredGuessesUsed ?? this.restoredGuessesUsed,
     );
   }
 }

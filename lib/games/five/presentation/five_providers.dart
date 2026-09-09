@@ -42,6 +42,7 @@ class FiveGameController extends AsyncNotifier<FiveGameState> {
     if (existing != null) {
       return FiveGameState.initial(answer).copyWith(
         status: existing.won ? FiveStatus.won : FiveStatus.lost,
+        restoredGuessesUsed: existing.guessesUsed,
       );
     }
     return FiveGameState.initial(answer);

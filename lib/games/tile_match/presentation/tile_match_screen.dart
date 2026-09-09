@@ -96,11 +96,13 @@ class _TileMatchBody extends ConsumerWidget {
             ),
           ),
         ),
-        if (state.status == TileMatchStatus.stuck)
+        if (state.status == TileMatchStatus.stuck || state.locked)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: Text(
-              'No matching pair is free. Undo a move, or come back tomorrow.',
+              state.locked
+                  ? "Today's board ran dry. Come back tomorrow for a new one."
+                  : 'No matching pair is free. Undo a move, or come back tomorrow.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
@@ -120,7 +122,7 @@ class _TileMatchBody extends ConsumerWidget {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: state.canUndo ? controller.undo : null,
+                  onPressed: (!state.locked && state.canUndo) ? controller.undo : null,
                   icon: const Icon(Icons.undo_rounded, size: 18),
                   label: const Text('Undo'),
                 ),
@@ -128,7 +130,7 @@ class _TileMatchBody extends ConsumerWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton.icon(
-                  onPressed: state.isPlaying ? controller.hint : null,
+                  onPressed: (!state.locked && state.isPlaying) ? controller.hint : null,
                   icon: const Icon(Icons.lightbulb_outline_rounded, size: 18),
                   label: const Text('Hint'),
                 ),

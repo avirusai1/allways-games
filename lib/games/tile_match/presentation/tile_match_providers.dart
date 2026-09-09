@@ -42,11 +42,15 @@ class TileMatchGameController extends AsyncNotifier<TileMatchGameState> {
 
     final existing = await _stats.completionForDay(_dayIndex);
     if (existing != null) {
+      // A cleared day shows an empty board. A day that ended stuck can't
+      // show its true final layout (only won/elapsedSeconds are
+      // persisted), so it's shown locked instead — otherwise the full,
+      // freshly-reset board would be silently replayable and could
+      // overwrite that day's result with a bogus frozen-clock time.
       return initial.copyWith(
-        // A cleared day shows an empty board; a day that ended stuck is
-        // left as it was rather than replayed for a better result.
         remaining: existing.won ? <TileSlot>{} : initial.remaining,
         elapsedSeconds: existing.elapsedSeconds ?? 0,
+        locked: !existing.won,
       );
     }
 

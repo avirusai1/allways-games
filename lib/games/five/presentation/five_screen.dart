@@ -35,6 +35,17 @@ class FiveScreen extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, _) => Center(child: Text('Could not load today\'s puzzle: $err')),
           data: (state) {
+            // A finished day reopened cold has no letter-by-letter history
+            // to show as a grid (only the outcome persists) — an empty
+            // grid with a dead keyboard would look broken, so this shows
+            // the outcome directly instead and offers the result sheet on
+            // demand rather than only right after finishing.
+            if (state.isRestoredWithoutHistory) {
+              return _AlreadyPlayedBody(
+                state: state,
+                onViewResult: () => _showResultSheet(context, ref, state),
+              );
+            }
             return Column(
               children: [
                 const SizedBox(height: 12),
@@ -81,6 +92,51 @@ class FiveScreen extends ConsumerWidget {
   }
 }
 
+class _AlreadyPlayedBody extends StatelessWidget {
+  const _AlreadyPlayedBody({required this.state, required this.onViewResult});
+
+  final FiveGameState state;
+  final VoidCallback onViewResult;
+
+  @override
+  Widget build(BuildContext context) {
+    final won = state.status == FiveStatus.won;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              won ? Icons.emoji_events_outlined : Icons.replay_outlined,
+              size: 48,
+              color: AppColors.primary,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "You've already played today",
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              won
+                  ? 'Solved in ${state.guessesUsedForDisplay}/$fiveMaxGuesses. '
+                      'A new word arrives tomorrow.'
+                  : 'The word was ${state.answer.toUpperCase()}. '
+                      'A new word arrives tomorrow.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            const SizedBox(height: 20),
+            OutlinedButton(onPressed: onViewResult, child: const Text('View result')),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ResultSheet extends ConsumerWidget {
   const _ResultSheet({required this.state, required this.dayIndex});
 
@@ -105,7 +161,7 @@ class _ResultSheet extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             won
-                ? 'You got it in ${state.submittedGuesses.length}/$fiveMaxGuesses.'
+                ? 'You got it in ${state.guessesUsedForDisplay}/$fiveMaxGuesses.'
                 : 'The word was ${state.answer.toUpperCase()}.',
             style: Theme.of(context).textTheme.bodyLarge,
           ),
@@ -130,14 +186,26 @@ class _ResultSheet extends ConsumerWidget {
           const SizedBox(height: 20),
           FilledButton.icon(
             onPressed: () {
-              final text = ShareCard.buildResultText(
-                appName: 'Allways Games',
-                gameName: 'Five',
-                dayIndex: dayIndex,
-                evaluations: state.evaluations,
-                won: won,
-                maxGuesses: fiveMaxGuesses,
-              );
+              // A cold-reopened finished day has no per-guess grid to draw
+              // (only the outcome persists) — fall back to the plain
+              // summary line rather than sharing a fake all-empty grid.
+              final text = state.evaluations.isNotEmpty
+                  ? ShareCard.buildResultText(
+                      appName: 'Allways Games',
+                      gameName: 'Five',
+                      dayIndex: dayIndex,
+                      evaluations: state.evaluations,
+                      won: won,
+                      maxGuesses: fiveMaxGuesses,
+                    )
+                  : ShareCard.buildSummaryResultText(
+                      appName: 'Allways Games',
+                      gameName: 'Five',
+                      dayIndex: dayIndex,
+                      score: won
+                          ? '${state.guessesUsedForDisplay}/$fiveMaxGuesses'
+                          : 'X/$fiveMaxGuesses',
+                    );
               ShareCard.share(text);
             },
             icon: const Icon(Icons.share_outlined),
