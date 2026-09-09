@@ -6,12 +6,15 @@ This policy explains what Allways Games ("the app") does with data. It is
 written to be accurate rather than reassuring: where data is collected, it
 says so.
 
-> **Before publishing:** host this page at a public URL (GitHub Pages is
-> free and works well) and paste that URL into the Play Console listing.
-> Google requires a reachable privacy policy link, and the listing is
-> rejected without one. The contact email below is filled in with the
-> address on this account — swap it for a dedicated support address if you
-> want one separate from your personal inbox.
+> **Hosted at:** https://avirusai1.github.io/allways-games-legal/ — paste
+> that URL into the Play Console listing's privacy policy field. It's
+> served via GitHub Pages from the separate
+> [allways-games-legal](https://github.com/avirusai1/allways-games-legal)
+> repo (kept separate from the app's own repo). This file is the source
+> of truth; if you edit it, mirror the change into that repo's
+> `docs/index.html` and push. The contact email is filled in with the
+> address on this account — swap it for a dedicated support address if
+> you want one separate from your personal inbox.
 
 ---
 

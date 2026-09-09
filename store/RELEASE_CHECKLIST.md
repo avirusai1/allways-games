@@ -1,7 +1,7 @@
 # Play Store release checklist
 
-Everything here needs your Play Console and AdMob accounts, so it is the
-part I cannot do for you. Items are ordered so the blocking ones come
+Most of what's left needs your Play Console and AdMob accounts, so it is
+the part I cannot do for you. Items are ordered so the blocking ones come
 first.
 
 ---
@@ -27,17 +27,6 @@ keep being used until you fill in the real ones. That is deliberate: real
 units firing during development get an AdMob account suspended for invalid
 traffic.
 
-### Release signing key — ✅ done
-The build is signed with a real upload key (`android/key.properties`,
-gitignored; the `.jks` lives outside the repo). Every AAB/APK in `dist/`
-is verified via `apksigner` as `CN=Allways Games`, not debug.
-
-### Privacy policy URL
-`store/privacy-policy.md` is written and ready, with a real contact email
-filled in. Still needed:
-1. Host it at a public URL (GitHub Pages is fine and free)
-2. Paste that URL into the Play Console listing
-
 ### In-app purchase product
 The code expects a product id of exactly `allways_remove_ads`
 (`lib/core/iap/entitlements.dart`).
@@ -51,8 +40,9 @@ The code expects a product id of exactly `allways_remove_ads`
 
 - **Data Safety form.** Declare what AdMob collects: advertising ID,
   device/diagnostic info, approximate location, and purchase history via
-  Play Billing. `store/privacy-policy.md` describes all of it — the form
-  must match the policy or the submission is rejected.
+  Play Billing. The [privacy policy](https://avirusai1.github.io/allways-games-legal/)
+  describes all of it — the form must match the policy or the submission
+  is rejected.
 - **Content rating questionnaire (IARC).** A word/puzzle game with ads
   should rate low, but the questionnaire is mandatory.
 - **Target audience.** Declare a general audience, not children — the app
@@ -100,3 +90,4 @@ Output: `build/app/outputs/bundle/release/app-release.aab`
 - ✅ Minimal permissions: internet only
 - ✅ Real release signing key wired and verified (not debug)
 - ✅ Store listing text, screenshots, feature graphic, and icon
+- ✅ Privacy policy hosted and live: https://avirusai1.github.io/allways-games-legal/
