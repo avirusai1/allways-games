@@ -4,10 +4,33 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/daily_seed/daily_seed.dart';
 import '../../../core/persistence/streak.dart';
+import '../../../shared_game_kit/difficulty/difficulty_picker.dart';
 import '../../../shared_game_kit/share_card/share_card.dart';
 import '../domain/weave_game_state.dart';
+import '../domain/weave_puzzle.dart';
 import 'weave_providers.dart';
 import 'widgets/weave_board.dart';
+
+const List<DifficultyOption<WeaveDifficulty>> _difficultyOptions = [
+  DifficultyOption(
+    value: WeaveDifficulty.easy,
+    label: 'Easy',
+    description: 'A loose grid, easy to stumble onto words',
+    icon: Icons.sentiment_satisfied_outlined,
+  ),
+  DifficultyOption(
+    value: WeaveDifficulty.medium,
+    label: 'Medium',
+    description: 'A fair number of incidental words',
+    icon: Icons.sentiment_neutral_outlined,
+  ),
+  DifficultyOption(
+    value: WeaveDifficulty.hard,
+    label: 'Hard',
+    description: 'A tight grid — every path has to count',
+    icon: Icons.local_fire_department_outlined,
+  ),
+];
 
 class WeaveScreen extends ConsumerWidget {
   const WeaveScreen({super.key});
@@ -21,27 +44,77 @@ class WeaveScreen extends ConsumerWidget {
       final value = next.valueOrNull;
       if (value == null) return;
       if (wasPlaying && value.status == WeaveStatus.solved) {
+        final difficulty = ref
+                .read(weaveGameControllerProvider.notifier)
+                .currentDifficulty ??
+            WeaveDifficulty.medium;
         showModalBottomSheet(
           context: context,
           backgroundColor: AppColors.background,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
-          builder: (_) => _ResultSheet(state: value),
+          builder: (_) => _ResultSheet(state: value, difficulty: difficulty),
         );
       }
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Weave')),
+      appBar: AppBar(
+        title: const Text('Weave'),
+        actions: [
+          asyncState.maybeWhen(
+            data: (state) => state == null
+                ? const SizedBox.shrink()
+                : IconButton(
+                    tooltip: 'Change difficulty',
+                    icon: const Icon(Icons.tune),
+                    onPressed: () => ref
+                        .read(weaveGameControllerProvider.notifier)
+                        .changeDifficulty(),
+                  ),
+            orElse: () => const SizedBox.shrink(),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: asyncState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) =>
-              Center(child: Text("Could not load today's puzzle: $err")),
-          data: (state) => _WeaveBody(state: state),
+          error: (err, _) => Center(child: Text('Could not load Weave: $err')),
+          data: (state) => state == null
+              ? _DifficultyPickerBody(
+                  onSelect: (d) => ref
+                      .read(weaveGameControllerProvider.notifier)
+                      .selectDifficulty(d),
+                )
+              : _WeaveBody(state: state),
         ),
       ),
+    );
+  }
+}
+
+class _DifficultyPickerBody extends ConsumerWidget {
+  const _DifficultyPickerBody({required this.onSelect});
+
+  final ValueChanged<WeaveDifficulty> onSelect;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final freePlay = ref.watch(weaveFreePlayStatsProvider);
+    final solvedCounts = freePlay.maybeWhen(
+      data: (stats) => {
+        for (final d in WeaveDifficulty.values)
+          d: stats.forDifficulty(d.name).solved,
+      },
+      orElse: () => const <WeaveDifficulty, int>{},
+    );
+
+    return DifficultyPicker<WeaveDifficulty>(
+      title: 'Choose a difficulty',
+      options: _difficultyOptions,
+      solvedCounts: solvedCounts,
+      onSelect: onSelect,
     );
   }
 }
@@ -155,13 +228,15 @@ class _WeaveBody extends ConsumerWidget {
 }
 
 class _ResultSheet extends ConsumerWidget {
-  const _ResultSheet({required this.state});
+  const _ResultSheet({required this.state, required this.difficulty});
 
   final WeaveGameState state;
+  final WeaveDifficulty difficulty;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statsAsync = ref.watch(weaveStatsProvider);
+    final freePlayAsync = ref.watch(weaveFreePlayStatsProvider);
     final dayIndex = DailySeed.todayIndex();
 
     return Padding(
@@ -184,7 +259,10 @@ class _ResultSheet extends ConsumerWidget {
             data: (stats) {
               final current =
                   StreakCalculator.current(stats.wonDayIndices, dayIndex);
-              final longest = StreakCalculator.longest(stats.wonDayIndices);
+              final tier = freePlayAsync.maybeWhen(
+                data: (fp) => fp.forDifficulty(difficulty.name),
+                orElse: () => null,
+              );
               return Row(
                 children: [
                   _StatChip(
@@ -194,37 +272,65 @@ class _ResultSheet extends ConsumerWidget {
                   ),
                   const SizedBox(width: 12),
                   _StatChip(
-                    label: 'Best',
-                    value: '$longest',
-                    icon: Icons.emoji_events_outlined,
+                    label: 'Woven',
+                    value: tier == null ? '—' : '${tier.solved}',
+                    icon: Icons.check_circle_outline,
                   ),
                   const SizedBox(width: 12),
                   _StatChip(
-                    label: 'Played',
-                    value: '${stats.totalPlayed}',
-                    icon: Icons.calendar_today,
+                    label: 'Fewest hints',
+                    value: tier?.bestSeconds == null ? '—' : '${tier!.bestSeconds}',
+                    icon: Icons.lightbulb_outline,
                   ),
                 ],
               );
             },
           ),
           const SizedBox(height: 20),
-          FilledButton.icon(
-            onPressed: () => ShareCard.share(
-              ShareCard.buildSummaryResultText(
-                appName: 'Allways Games',
-                gameName: 'Weave',
-                dayIndex: dayIndex,
-                score: '${state.puzzle.solutions.length}/'
-                    '${state.puzzle.solutions.length}',
-                lines: [
-                  state.puzzle.clue,
-                  '${state.foundBonusWords.length} bonus words',
-                ],
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    ref
+                        .read(weaveGameControllerProvider.notifier)
+                        .selectDifficulty(difficulty);
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Play another'),
+                ),
               ),
+              const SizedBox(width: 10),
+              OutlinedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  ref.read(weaveGameControllerProvider.notifier).changeDifficulty();
+                },
+                child: const Text('Change difficulty'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton.icon(
+              onPressed: () => ShareCard.share(
+                ShareCard.buildSummaryResultText(
+                  appName: 'Allways Games',
+                  gameName: 'Weave',
+                  dayIndex: dayIndex,
+                  score: '${state.puzzle.solutions.length}/'
+                      '${state.puzzle.solutions.length}',
+                  lines: [
+                    '${difficulty.label} · ${state.puzzle.clue}',
+                    '${state.foundBonusWords.length} bonus words',
+                  ],
+                ),
+              ),
+              icon: const Icon(Icons.share_outlined, size: 18),
+              label: const Text('Share result'),
             ),
-            icon: const Icon(Icons.share_outlined),
-            label: const Text('Share result'),
           ),
         ],
       ),

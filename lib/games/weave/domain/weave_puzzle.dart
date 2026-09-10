@@ -1,5 +1,20 @@
 import 'weave_grid.dart';
 
+/// Free-play difficulty tiers, bucketed by how many bonus words a grid
+/// hides: a looser, more redundant letter arrangement throws off far more
+/// incidental real words, which in practice makes a grid's theme words
+/// easier to stumble onto while tracing. Fewer bonus words means a
+/// tighter, less forgiving grid.
+enum WeaveDifficulty { easy, medium, hard }
+
+extension WeaveDifficultyLabel on WeaveDifficulty {
+  String get label => switch (this) {
+        WeaveDifficulty.easy => 'Easy',
+        WeaveDifficulty.medium => 'Medium',
+        WeaveDifficulty.hard => 'Hard',
+      };
+}
+
 /// One published Weave puzzle.
 class WeavePuzzle {
   WeavePuzzle({

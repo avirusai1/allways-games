@@ -35,14 +35,25 @@ class FreePlayStats {
     );
   }
 
-  Future<void> recordSolve(String difficulty, int elapsedSeconds) async {
+  /// Records a solve and updates the tracked "best" value for [difficulty].
+  ///
+  /// By default lower is better (elapsed seconds, fewest words) — the shape
+  /// every game but Honeycomb's score uses. Pass [higherIsBetter] for a
+  /// metric like a word-finding score, where more is the improvement.
+  Future<void> recordSolve(
+    String difficulty,
+    int value, {
+    bool higherIsBetter = false,
+  }) async {
     final solvedKey = _solvedKey(difficulty);
     await _prefs.setInt(solvedKey, (_prefs.getInt(solvedKey) ?? 0) + 1);
 
     final bestKey = _bestKey(difficulty);
     final currentBest = _prefs.getInt(bestKey);
-    if (currentBest == null || elapsedSeconds < currentBest) {
-      await _prefs.setInt(bestKey, elapsedSeconds);
+    final improved = currentBest == null ||
+        (higherIsBetter ? value > currentBest : value < currentBest);
+    if (improved) {
+      await _prefs.setInt(bestKey, value);
     }
   }
 }

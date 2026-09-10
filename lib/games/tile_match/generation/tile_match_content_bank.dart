@@ -31,4 +31,12 @@ class TileMatchContentBank implements DailyPuzzleBank<TileMatchPuzzle> {
 
   @override
   TileMatchPuzzle puzzleForToday() => puzzleForDayIndex(DailySeed.todayIndex());
+
+  /// Every puzzle built on [layoutName], for free play where the player
+  /// picks a board size up front rather than getting whatever today's
+  /// calendar slot is. The three shipped layouts differ in tile count
+  /// (Long Hall 78, Spire 82, Terrace 88), so this is a real size/difficulty
+  /// tier, not a cosmetic label on identical boards.
+  List<TileMatchPuzzle> puzzlesOfLayout(String layoutName) =>
+      _puzzles.where((p) => p.layout.name == layoutName).toList();
 }

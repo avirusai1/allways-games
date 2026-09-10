@@ -1,5 +1,21 @@
 import 'crossword_grid.dart';
 
+/// Free-play difficulty tiers.
+///
+/// The shipped grids only ever use 6 or 8 black squares — two genuinely
+/// distinct shapes, not three — so this is deliberately a two-way choice
+/// rather than an Easy/Medium/Hard picker with a fabricated middle tier.
+/// Fewer black squares means more open cells to fill, which is what
+/// actually makes a grid harder.
+enum CrosswordDifficulty { easy, hard }
+
+extension CrosswordDifficultyLabel on CrosswordDifficulty {
+  String get label => switch (this) {
+        CrosswordDifficulty.easy => 'Easy',
+        CrosswordDifficulty.hard => 'Hard',
+      };
+}
+
 /// One entry in a published puzzle: where it sits, its answer, its clue.
 class CrosswordEntry {
   const CrosswordEntry({

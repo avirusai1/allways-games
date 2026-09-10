@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/daily_seed/daily_seed.dart';
 import '../../../core/persistence/isar_provider.dart';
+import '../../../core/stats/free_play_stats.dart';
 import '../data/groups_stats_repository.dart';
 import '../domain/groups_game_state.dart';
 import '../domain/groups_puzzle.dart';
@@ -24,37 +25,55 @@ final groupsStatsProvider = FutureProvider<GroupsGameStats>((ref) async {
   return repo.loadStats();
 });
 
-/// Drives one day's Groups puzzle.
+/// Cumulative "played as many as you like" count. Groups has no content
+/// axis to hang a real Easy/Medium/Hard picker on — every puzzle mixes a
+/// straightforward, a tricky and two in-between categories by design — so
+/// unlike the other free-play games this one has no difficulty tiers, just
+/// unlimited random puzzles.
+final groupsFreePlayStatsProvider = FutureProvider<FreePlayStats>((ref) async {
+  final prefs = await ref.watch(sharedPreferencesProvider.future);
+  return FreePlayStats('groups', prefs);
+});
+
+/// Drives Groups as free play: a fresh random puzzle every time, with no
+/// one-per-day lock.
+///
+/// Unlike the other converted games, Groups has no per-puzzle difficulty
+/// signal in its content — every puzzle is built the same way, one
+/// category at each of four difficulty levels — so there is no picker
+/// screen here: [build] draws a puzzle immediately, and [newPuzzle] draws
+/// another any time the player wants one.
 class GroupsGameController extends AsyncNotifier<GroupsGameState> {
+  late GroupsContentBank _bank;
   late GroupsStatsRepository _stats;
-  late int _dayIndex;
+  late FreePlayStats _freePlayStats;
+  final Random _random = Random();
   final Random _shuffleRandom = Random();
+  GroupsPuzzle? _lastPuzzle;
 
   @override
   Future<GroupsGameState> build() async {
-    final bank = await ref.watch(groupsContentBankProvider.future);
+    _bank = await ref.watch(groupsContentBankProvider.future);
     _stats = await ref.watch(groupsStatsRepositoryProvider.future);
-    _dayIndex = DailySeed.todayIndex();
+    _freePlayStats = await ref.watch(groupsFreePlayStatsProvider.future);
+    return _freshState();
+  }
 
-    final puzzle = bank.puzzleForDayIndex(_dayIndex);
+  GroupsGameState _freshState() {
+    final pool = _bank.puzzles;
+    GroupsPuzzle puzzle;
+    do {
+      puzzle = pool[_random.nextInt(pool.length)];
+    } while (identical(puzzle, _lastPuzzle) && pool.length > 1);
+    _lastPuzzle = puzzle;
 
-    // The board is shuffled per day rather than per launch: everyone
-    // playing today sees the same arrangement, so "the one in the corner"
-    // means the same thing to two people talking about it. The day index
-    // seeds it, so closing and reopening does not reshuffle the puzzle
-    // under the player either.
-    final order = List<String>.of(puzzle.allWordTexts)
-      ..shuffle(Random(_dayIndex));
-    final initial = GroupsGameState.initial(puzzle, tileOrder: order);
+    final order = List<String>.of(puzzle.allWordTexts)..shuffle(_shuffleRandom);
+    return GroupsGameState.initial(puzzle, tileOrder: order);
+  }
 
-    final existing = await _stats.completionForDay(_dayIndex);
-    if (existing != null) {
-      // A finished day shows its answers rather than being replayed.
-      return initial
-          .copyWith(mistakes: existing.won ? 0 : groupsMistakeLimit)
-          .revealAll();
-    }
-    return initial;
+  /// Starts a new random puzzle, discarding the current one.
+  void newPuzzle() {
+    state = AsyncData(_freshState());
   }
 
   void toggleWord(String word) => _apply((s) => s.toggleWord(word));
@@ -88,12 +107,19 @@ class GroupsGameController extends AsyncNotifier<GroupsGameState> {
     state = AsyncData(next);
 
     if (current.isPlaying && !next.isPlaying) {
+      // Streak is still "did you play today", independent of how many
+      // puzzles that was — free play removes the one-per-day cap, not the
+      // reason to come back daily.
       await _stats.recordCompletion(
-        dayIndex: _dayIndex,
+        dayIndex: DailySeed.todayIndex(),
         solved: next.status == GroupsStatus.solved,
         mistakes: next.mistakes,
       );
+      if (next.status == GroupsStatus.solved) {
+        await _freePlayStats.recordSolve('all', next.mistakes);
+      }
       ref.invalidate(groupsStatsProvider);
+      ref.invalidate(groupsFreePlayStatsProvider);
     }
     return (outcome: result.outcome, found: result.found);
   }

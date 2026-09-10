@@ -63,6 +63,13 @@ class WeaveGameState {
   int get remaining => puzzle.solutions.length - foundThemeWords.length;
   bool get spannerFound => foundThemeWords.contains(puzzle.spanner);
 
+  /// Hints spent so far: every third bonus word earns one, so the balance
+  /// still on hand subtracts from the running total. Free play's "best"
+  /// score for this game — Weave has no timer — is the fewest hints a
+  /// solve needed.
+  int get hintsSpent =>
+      (foundBonusWords.length ~/ weaveBonusPerHint) - hintsAvailable;
+
   /// Cells already claimed by a found theme word, for drawing the grid.
   Set<int> get foundCells => {
         for (final word in foundThemeWords) ...?puzzle.solutions[word],

@@ -1,12 +1,15 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/daily_seed/daily_seed.dart';
 import '../../../core/persistence/isar_provider.dart';
+import '../../../core/stats/free_play_stats.dart';
 import '../data/tile_match_stats_repository.dart';
 import '../domain/tile_layout.dart';
 import '../domain/tile_match_game_state.dart';
+import '../domain/tile_match_puzzle.dart';
 import '../generation/tile_match_content_bank.dart';
 
 final tileMatchContentBankProvider =
@@ -25,38 +28,53 @@ final tileMatchStatsProvider = FutureProvider<TileMatchGameStats>((ref) async {
   return repo.loadStats();
 });
 
-/// Drives one day's Tile Match board.
-class TileMatchGameController extends AsyncNotifier<TileMatchGameState> {
+final tileMatchFreePlayStatsProvider = FutureProvider<FreePlayStats>((ref) async {
+  final prefs = await ref.watch(sharedPreferencesProvider.future);
+  return FreePlayStats('tile_match', prefs);
+});
+
+/// Drives Tile Match as free play: the player picks a board size, clears
+/// (or gets stuck on) as many boards of it as they like, and can switch
+/// size at any time.
+///
+/// [state] is null while no board is active — the screen reads that as
+/// "show the difficulty picker".
+class TileMatchGameController extends AsyncNotifier<TileMatchGameState?> {
+  late TileMatchContentBank _bank;
   late TileMatchStatsRepository _stats;
-  late int _dayIndex;
+  late FreePlayStats _freePlayStats;
+  final Random _random = Random();
+  TileMatchPuzzle? _lastPuzzle;
   Timer? _timer;
 
   @override
-  Future<TileMatchGameState> build() async {
-    final bank = await ref.watch(tileMatchContentBankProvider.future);
+  Future<TileMatchGameState?> build() async {
+    _bank = await ref.watch(tileMatchContentBankProvider.future);
     _stats = await ref.watch(tileMatchStatsRepositoryProvider.future);
-    _dayIndex = DailySeed.todayIndex();
+    _freePlayStats = await ref.watch(tileMatchFreePlayStatsProvider.future);
+    ref.onDispose(() => _timer?.cancel());
+    return null; // No board size chosen yet.
+  }
 
-    final puzzle = bank.puzzleForDayIndex(_dayIndex);
-    final initial = TileMatchGameState.initial(puzzle);
+  /// Starts a fresh board on [layoutName], drawn at random from the bank.
+  void selectDifficulty(String layoutName) {
+    final pool = _bank.puzzlesOfLayout(layoutName);
+    if (pool.isEmpty) return;
 
-    final existing = await _stats.completionForDay(_dayIndex);
-    if (existing != null) {
-      // A cleared day shows an empty board. A day that ended stuck can't
-      // show its true final layout (only won/elapsedSeconds are
-      // persisted), so it's shown locked instead — otherwise the full,
-      // freshly-reset board would be silently replayable and could
-      // overwrite that day's result with a bogus frozen-clock time.
-      return initial.copyWith(
-        remaining: existing.won ? <TileSlot>{} : initial.remaining,
-        elapsedSeconds: existing.elapsedSeconds ?? 0,
-        locked: !existing.won,
-      );
-    }
+    TileMatchPuzzle puzzle;
+    do {
+      puzzle = pool[_random.nextInt(pool.length)];
+    } while (identical(puzzle, _lastPuzzle) && pool.length > 1);
+    _lastPuzzle = puzzle;
 
     _startClock();
-    ref.onDispose(() => _timer?.cancel());
-    return initial;
+    state = AsyncData(TileMatchGameState.initial(puzzle));
+  }
+
+  /// Back to the difficulty picker without recording anything.
+  void changeDifficulty() {
+    _timer?.cancel();
+    state = const AsyncData(null);
   }
 
   void _startClock() {
@@ -103,16 +121,28 @@ class TileMatchGameController extends AsyncNotifier<TileMatchGameState> {
 
   Future<void> _finish(TileMatchGameState finished) async {
     _timer?.cancel();
+    final cleared = finished.status == TileMatchStatus.cleared;
+
+    // Streak is still "did you play today", independent of how many boards
+    // that was — free play removes the one-per-day cap, not the reason to
+    // come back daily.
     await _stats.recordCompletion(
-      dayIndex: _dayIndex,
-      cleared: finished.status == TileMatchStatus.cleared,
+      dayIndex: DailySeed.todayIndex(),
+      cleared: cleared,
       elapsedSeconds: finished.elapsedSeconds,
     );
+    if (cleared) {
+      await _freePlayStats.recordSolve(
+        finished.puzzle.layout.name,
+        finished.elapsedSeconds,
+      );
+    }
     ref.invalidate(tileMatchStatsProvider);
+    ref.invalidate(tileMatchFreePlayStatsProvider);
   }
 }
 
 final tileMatchGameControllerProvider =
-    AsyncNotifierProvider<TileMatchGameController, TileMatchGameState>(
+    AsyncNotifierProvider<TileMatchGameController, TileMatchGameState?>(
   TileMatchGameController.new,
 );

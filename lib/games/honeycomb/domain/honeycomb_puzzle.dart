@@ -1,5 +1,19 @@
 import 'honeycomb_scoring.dart';
 
+/// Free-play difficulty tiers, bucketed by how many answers a board has:
+/// a letter set with fewer valid words gives the player fewer things left
+/// to find once the easy ones are gone, which is what actually makes one
+/// Honeycomb board harder than another.
+enum HoneycombDifficulty { easy, medium, hard }
+
+extension HoneycombDifficultyLabel on HoneycombDifficulty {
+  String get label => switch (this) {
+        HoneycombDifficulty.easy => 'Easy',
+        HoneycombDifficulty.medium => 'Medium',
+        HoneycombDifficulty.hard => 'Hard',
+      };
+}
+
 /// One published Honeycomb board: seven letters, one of which every answer
 /// must use.
 class HoneycombPuzzle {

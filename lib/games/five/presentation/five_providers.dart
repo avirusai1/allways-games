@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/daily_seed/daily_seed.dart';
 import '../../../core/persistence/isar_provider.dart';
+import '../../../core/stats/free_play_stats.dart';
 import '../data/five_stats_repository.dart';
 import '../domain/five_game_state.dart';
 import '../domain/guess_evaluator.dart';
@@ -21,31 +24,54 @@ final fiveStatsProvider = FutureProvider<FiveGameStats>((ref) async {
   return repo.loadStats();
 });
 
-/// Drives one day's Five puzzle: loads today's answer, applies letter
-/// input, validates + scores submissions, and persists the outcome once
-/// the game ends. Today's puzzle can only be completed once; reopening a
-/// finished puzzle shows its final won/lost state rather than a blank grid
-/// (full guess-history replay isn't stored in this MVP).
-class FiveGameController extends AsyncNotifier<FiveGameState> {
+final fiveFreePlayStatsProvider = FutureProvider<FreePlayStats>((ref) async {
+  final prefs = await ref.watch(sharedPreferencesProvider.future);
+  return FreePlayStats('five', prefs);
+});
+
+/// Drives Five as free play: the player picks a difficulty, guesses as
+/// many words of it as they like, and can switch difficulty at any time.
+///
+/// [state] is null while no word is active — the screen reads that as
+/// "show the difficulty picker".
+class FiveGameController extends AsyncNotifier<FiveGameState?> {
   late FiveContentBank _bank;
   late FiveStatsRepository _stats;
-  late int _dayIndex;
+  late FreePlayStats _freePlayStats;
+  final Random _random = Random();
+  String? _lastAnswer;
+  FiveDifficulty? _currentDifficulty;
+
+  /// The tier the active word was drawn from — null before any difficulty
+  /// is chosen.
+  FiveDifficulty? get currentDifficulty => _currentDifficulty;
 
   @override
-  Future<FiveGameState> build() async {
+  Future<FiveGameState?> build() async {
     _bank = await ref.watch(fiveContentBankProvider.future);
     _stats = await ref.watch(fiveStatsRepositoryProvider.future);
-    _dayIndex = DailySeed.todayIndex();
-    final answer = _bank.puzzleForDayIndex(_dayIndex);
+    _freePlayStats = await ref.watch(fiveFreePlayStatsProvider.future);
+    return null; // No difficulty chosen yet.
+  }
 
-    final existing = await _stats.completionForDay(_dayIndex);
-    if (existing != null) {
-      return FiveGameState.initial(answer).copyWith(
-        status: existing.won ? FiveStatus.won : FiveStatus.lost,
-        restoredGuessesUsed: existing.guessesUsed,
-      );
-    }
-    return FiveGameState.initial(answer);
+  /// Starts a fresh word of [difficulty], drawn at random from the bank.
+  void selectDifficulty(FiveDifficulty difficulty) {
+    final pool = _bank.puzzlesOfDifficulty(difficulty);
+    if (pool.isEmpty) return;
+
+    String answer;
+    do {
+      answer = pool[_random.nextInt(pool.length)];
+    } while (answer == _lastAnswer && pool.length > 1);
+    _lastAnswer = answer;
+    _currentDifficulty = difficulty;
+
+    state = AsyncData(FiveGameState.initial(answer));
+  }
+
+  /// Back to the difficulty picker without recording anything.
+  void changeDifficulty() {
+    state = const AsyncData(null);
   }
 
   void inputLetter(String letter) {
@@ -97,16 +123,23 @@ class FiveGameController extends AsyncNotifier<FiveGameState> {
     );
 
     if (newStatus != FiveStatus.playing) {
+      // Streak is still "did you play today", independent of how many
+      // words that was — free play removes the one-per-day cap, not the
+      // reason to come back daily.
       await _stats.recordCompletion(
-        dayIndex: _dayIndex,
+        dayIndex: DailySeed.todayIndex(),
         won: won,
         guessesUsed: newGuesses.length,
       );
+      if (won && _currentDifficulty != null) {
+        await _freePlayStats.recordSolve(_currentDifficulty!.name, newGuesses.length);
+      }
       ref.invalidate(fiveStatsProvider);
+      ref.invalidate(fiveFreePlayStatsProvider);
     }
     return null;
   }
 }
 
 final fiveGameControllerProvider =
-    AsyncNotifierProvider<FiveGameController, FiveGameState>(FiveGameController.new);
+    AsyncNotifierProvider<FiveGameController, FiveGameState?>(FiveGameController.new);

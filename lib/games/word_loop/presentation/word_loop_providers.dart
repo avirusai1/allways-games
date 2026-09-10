@@ -1,9 +1,13 @@
+import 'dart:math';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/daily_seed/daily_seed.dart';
 import '../../../core/persistence/isar_provider.dart';
+import '../../../core/stats/free_play_stats.dart';
 import '../data/word_loop_stats_repository.dart';
 import '../domain/word_loop_game_state.dart';
+import '../domain/word_loop_puzzle.dart';
 import '../generation/word_loop_content_bank.dart';
 
 final wordLoopContentBankProvider = FutureProvider<WordLoopContentBank>((ref) {
@@ -21,36 +25,56 @@ final wordLoopStatsProvider = FutureProvider<WordLoopGameStats>((ref) async {
   return repo.loadStats();
 });
 
-/// Drives one day's Word Loop board: forwards input to the pure
-/// [WordLoopGameState] transitions and records the solve.
+final wordLoopFreePlayStatsProvider = FutureProvider<FreePlayStats>((ref) async {
+  final prefs = await ref.watch(sharedPreferencesProvider.future);
+  return FreePlayStats('word_loop', prefs);
+});
+
+/// Drives Word Loop as free play: the player picks a difficulty, chains
+/// through as many boards of it as they like, and can switch difficulty at
+/// any time.
 ///
-/// Unlike Five and Sudoku, a finished day here is restored as *finished*
-/// with its word count intact rather than replayed, since the board has no
-/// losing state and replaying it would just let the count be improved
-/// after the fact.
-class WordLoopGameController extends AsyncNotifier<WordLoopGameState> {
+/// [state] is null while no board is active — the screen reads that as
+/// "show the difficulty picker".
+class WordLoopGameController extends AsyncNotifier<WordLoopGameState?> {
+  late WordLoopContentBank _bank;
   late WordLoopStatsRepository _stats;
-  late int _dayIndex;
+  late FreePlayStats _freePlayStats;
+  final Random _random = Random();
+  WordLoopPuzzle? _lastPuzzle;
+  WordLoopDifficulty? _currentDifficulty;
+
+  /// The tier the active board was drawn from, for the result sheet's
+  /// "Play another" and stats lookup — null before any difficulty is
+  /// chosen.
+  WordLoopDifficulty? get currentDifficulty => _currentDifficulty;
 
   @override
-  Future<WordLoopGameState> build() async {
-    final bank = await ref.watch(wordLoopContentBankProvider.future);
+  Future<WordLoopGameState?> build() async {
+    _bank = await ref.watch(wordLoopContentBankProvider.future);
     _stats = await ref.watch(wordLoopStatsRepositoryProvider.future);
-    _dayIndex = DailySeed.todayIndex();
+    _freePlayStats = await ref.watch(wordLoopFreePlayStatsProvider.future);
+    return null; // No difficulty chosen yet.
+  }
 
-    final puzzle = bank.puzzleForDayIndex(_dayIndex);
-    final initial = WordLoopGameState.initial(puzzle);
+  /// Starts a fresh board of [difficulty], drawn at random from the bank.
+  void selectDifficulty(WordLoopDifficulty difficulty) {
+    final pool = _bank.puzzlesOfDifficulty(difficulty);
+    if (pool.isEmpty) return;
 
-    final existing = await _stats.completionForDay(_dayIndex);
-    if (existing != null) {
-      // The chain itself is not stored, so show the board's own answer as
-      // the finished state rather than pretending to replay the player's.
-      return initial.copyWith(
-        chain: puzzle.exampleSolution,
-        status: WordLoopStatus.solved,
-      );
-    }
-    return initial;
+    WordLoopPuzzle puzzle;
+    do {
+      puzzle = pool[_random.nextInt(pool.length)];
+    } while (identical(puzzle, _lastPuzzle) && pool.length > 1);
+    _lastPuzzle = puzzle;
+    _currentDifficulty = difficulty;
+
+    state = AsyncData(WordLoopGameState.initial(puzzle));
+  }
+
+  /// Back to the difficulty picker without recording anything.
+  void changeDifficulty() {
+    state = const AsyncData(null);
   }
 
   void inputLetter(String letter) => _apply((s) => s.inputLetter(letter));
@@ -72,13 +96,21 @@ class WordLoopGameController extends AsyncNotifier<WordLoopGameState> {
 
     state = AsyncData(result.state);
     if (!result.state.isPlaying) {
+      // Streak is still "did you play today", independent of how many
+      // boards that was — free play removes the one-per-day cap, not the
+      // reason to come back daily.
       await _stats.recordCompletion(
-        dayIndex: _dayIndex,
+        dayIndex: DailySeed.todayIndex(),
         wordsUsed: result.state.wordsUsed,
       );
+      await _freePlayStats.recordSolve(
+        (_currentDifficulty ?? WordLoopDifficulty.medium).name,
+        result.state.wordsUsed,
+      );
       ref.invalidate(wordLoopStatsProvider);
+      ref.invalidate(wordLoopFreePlayStatsProvider);
     }
-    return null;
+    return result.rejection;
   }
 
   void _apply(WordLoopGameState Function(WordLoopGameState) transition) {
@@ -91,6 +123,6 @@ class WordLoopGameController extends AsyncNotifier<WordLoopGameState> {
 }
 
 final wordLoopGameControllerProvider =
-    AsyncNotifierProvider<WordLoopGameController, WordLoopGameState>(
+    AsyncNotifierProvider<WordLoopGameController, WordLoopGameState?>(
   WordLoopGameController.new,
 );

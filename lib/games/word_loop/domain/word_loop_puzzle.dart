@@ -1,5 +1,19 @@
 import 'word_loop_box.dart';
 
+/// Free-play difficulty tiers, bucketed by [WordLoopPuzzle.playableWordCount]
+/// rather than assigned by hand: a board with fewer valid words gives the
+/// player fewer real paths to a solution, which is what actually makes one
+/// Word Loop board harder than another.
+enum WordLoopDifficulty { easy, medium, hard }
+
+extension WordLoopDifficultyLabel on WordLoopDifficulty {
+  String get label => switch (this) {
+        WordLoopDifficulty.easy => 'Easy',
+        WordLoopDifficulty.medium => 'Medium',
+        WordLoopDifficulty.hard => 'Hard',
+      };
+}
+
 /// One published Word Loop board.
 ///
 /// Boards do not carry their own word list. Whether a word counts is

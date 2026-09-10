@@ -31,7 +31,6 @@ class TileMatchGameState {
     required this.selected,
     required this.history,
     required this.elapsedSeconds,
-    this.locked = false,
   });
 
   factory TileMatchGameState.initial(TileMatchPuzzle puzzle) =>
@@ -53,13 +52,6 @@ class TileMatchGameState {
 
   final List<TileMatchMove> history;
   final int elapsedSeconds;
-
-  /// True for a day reopened after it already ended in a loss. The actual
-  /// stuck board isn't persisted (only won/elapsedSeconds are), so this
-  /// restores the full layout for display purposes only — without it, that
-  /// full layout would be freely (and silently) replayable, corrupting the
-  /// day's recorded result and the frozen clock along with it.
-  final bool locked;
 
   Set<TileSlot> get freeSlots => TileBoard.freeSlots(remaining).toSet();
 
@@ -89,7 +81,6 @@ class TileMatchGameState {
   /// other free tile moves the selection there — which is what a player
   /// expects when they change their mind mid-pair.
   TileMatchGameState tap(TileSlot slot) {
-    if (locked) return this;
     if (!remaining.contains(slot)) return this;
     if (!isFree(slot)) return this;
     if (status == TileMatchStatus.cleared) return this;
@@ -114,9 +105,8 @@ class TileMatchGameState {
   ///
   /// Undo matters more here than in most games: a board can be made
   /// unwinnable by a single wrong pick long before that becomes visible,
-  /// and without undo the only remedy would be starting the day over.
+  /// and without undo the only remedy would be starting over.
   TileMatchGameState undo() {
-    if (locked) return this;
     if (history.isEmpty) return this;
     final move = history.last;
     return copyWith(
@@ -128,13 +118,12 @@ class TileMatchGameState {
 
   /// A pair that can be taken right now, for the hint button.
   (TileSlot, TileSlot)? hint() {
-    if (locked) return null;
     final moves = availableMoves;
     return moves.isEmpty ? null : moves.first;
   }
 
   TileMatchGameState tick() =>
-      (!locked && isPlaying) ? copyWith(elapsedSeconds: elapsedSeconds + 1) : this;
+      isPlaying ? copyWith(elapsedSeconds: elapsedSeconds + 1) : this;
 
   TileMatchGameState copyWith({
     Set<TileSlot>? remaining,
@@ -142,7 +131,6 @@ class TileMatchGameState {
     bool clearSelection = false,
     List<TileMatchMove>? history,
     int? elapsedSeconds,
-    bool? locked,
   }) {
     return TileMatchGameState(
       puzzle: puzzle,
@@ -150,7 +138,6 @@ class TileMatchGameState {
       selected: clearSelection ? null : (selected ?? this.selected),
       history: history ?? this.history,
       elapsedSeconds: elapsedSeconds ?? this.elapsedSeconds,
-      locked: locked ?? this.locked,
     );
   }
 }

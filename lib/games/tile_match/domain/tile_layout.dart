@@ -171,3 +171,14 @@ final List<TileLayout> tileLayouts = [
 
 TileLayout tileLayoutByName(String name) =>
     tileLayouts.firstWhere((layout) => layout.name == name);
+
+/// Layout names in tile-count order (78/82/88), smallest first — the app's
+/// stand-in for a difficulty ladder: more tiles means more of the board is
+/// still hidden underneath at any one time, and more pairs to track.
+const List<String> tileMatchDifficultyTiers = ['Long Hall', 'Spire', 'Terrace'];
+
+String tileMatchDifficultyLabel(String layoutName) => switch (layoutName) {
+      'Long Hall' => 'Easy',
+      'Spire' => 'Medium',
+      _ => 'Hard',
+    };

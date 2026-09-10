@@ -59,4 +59,22 @@ void main() {
     expect(dominoes.forDifficulty('easy').solved, 1);
     expect(dominoes.forDifficulty('easy').bestSeconds, 999);
   });
+
+  test('higherIsBetter tracks a maximum instead of a minimum', () async {
+    // Honeycomb's score climbs, unlike every other game's elapsed-time or
+    // guess-count "best" — this is the one place that direction flips.
+    final prefs = await SharedPreferences.getInstance();
+    final stats = FreePlayStats('honeycomb', prefs);
+
+    await stats.recordSolve('easy', 40, higherIsBetter: true);
+    await stats.recordSolve('easy', 10, higherIsBetter: true); // lower — ignored
+    final afterLower = stats.forDifficulty('easy');
+    expect(afterLower.solved, 2);
+    expect(afterLower.bestSeconds, 40);
+
+    await stats.recordSolve('easy', 65, higherIsBetter: true); // higher — replaces
+    final afterHigher = stats.forDifficulty('easy');
+    expect(afterHigher.solved, 3);
+    expect(afterHigher.bestSeconds, 65);
+  });
 }

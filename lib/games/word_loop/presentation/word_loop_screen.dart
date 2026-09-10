@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/daily_seed/daily_seed.dart';
 import '../../../core/persistence/streak.dart';
+import '../../../shared_game_kit/difficulty/difficulty_picker.dart';
 import '../../../shared_game_kit/share_card/share_card.dart';
 import '../domain/word_loop_game_state.dart';
+import '../domain/word_loop_puzzle.dart';
 import 'widgets/word_loop_board.dart';
 import 'word_loop_providers.dart';
 
@@ -23,6 +25,27 @@ String wordLoopRejectionMessage(WordLoopRejection rejection) {
   };
 }
 
+const List<DifficultyOption<WordLoopDifficulty>> _difficultyOptions = [
+  DifficultyOption(
+    value: WordLoopDifficulty.easy,
+    label: 'Easy',
+    description: 'Plenty of words fit this board',
+    icon: Icons.sentiment_satisfied_outlined,
+  ),
+  DifficultyOption(
+    value: WordLoopDifficulty.medium,
+    label: 'Medium',
+    description: 'A fair spread of options',
+    icon: Icons.sentiment_neutral_outlined,
+  ),
+  DifficultyOption(
+    value: WordLoopDifficulty.hard,
+    label: 'Hard',
+    description: 'Few words fit — plan your path',
+    icon: Icons.local_fire_department_outlined,
+  ),
+];
+
 class WordLoopScreen extends ConsumerWidget {
   const WordLoopScreen({super.key});
 
@@ -34,34 +57,92 @@ class WordLoopScreen extends ConsumerWidget {
       final wasPlaying = previous?.valueOrNull?.isPlaying ?? false;
       final value = next.valueOrNull;
       if (value == null || !wasPlaying || value.isPlaying) return;
-      _showResultSheet(context, value);
+      _showResultSheet(context, ref, value);
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Word Loop')),
+      appBar: AppBar(
+        title: const Text('Word Loop'),
+        actions: [
+          asyncState.maybeWhen(
+            data: (state) => state == null
+                ? const SizedBox.shrink()
+                : IconButton(
+                    tooltip: 'Change difficulty',
+                    icon: const Icon(Icons.tune),
+                    onPressed: () => ref
+                        .read(wordLoopGameControllerProvider.notifier)
+                        .changeDifficulty(),
+                  ),
+            orElse: () => const SizedBox.shrink(),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: asyncState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, _) => Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
-              child: Text("Could not load today's board: $err"),
+              child: Text('Could not load Word Loop: $err'),
             ),
           ),
-          data: (state) => _WordLoopBody(state: state),
+          data: (state) => state == null
+              ? _DifficultyPickerBody(
+                  onSelect: (d) => ref
+                      .read(wordLoopGameControllerProvider.notifier)
+                      .selectDifficulty(d),
+                )
+              : _WordLoopBody(state: state),
         ),
       ),
     );
   }
 
-  void _showResultSheet(BuildContext context, WordLoopGameState state) {
+  void _showResultSheet(
+    BuildContext context,
+    WidgetRef ref,
+    WordLoopGameState state,
+  ) {
+    final difficulty =
+        ref.read(wordLoopGameControllerProvider.notifier).currentDifficulty ??
+            WordLoopDifficulty.medium;
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.background,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => _ResultSheet(state: state, dayIndex: DailySeed.todayIndex()),
+      builder: (_) => _ResultSheet(
+        state: state,
+        dayIndex: DailySeed.todayIndex(),
+        difficulty: difficulty,
+      ),
+    );
+  }
+}
+
+class _DifficultyPickerBody extends ConsumerWidget {
+  const _DifficultyPickerBody({required this.onSelect});
+
+  final ValueChanged<WordLoopDifficulty> onSelect;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final freePlay = ref.watch(wordLoopFreePlayStatsProvider);
+    final solvedCounts = freePlay.maybeWhen(
+      data: (stats) => {
+        for (final d in WordLoopDifficulty.values)
+          d: stats.forDifficulty(d.name).solved,
+      },
+      orElse: () => const <WordLoopDifficulty, int>{},
+    );
+
+    return DifficultyPicker<WordLoopDifficulty>(
+      title: 'Choose a difficulty',
+      options: _difficultyOptions,
+      solvedCounts: solvedCounts,
+      onSelect: onSelect,
     );
   }
 }
@@ -139,7 +220,7 @@ class _WordLoopBody extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: Text(
-              'Board complete. A new one arrives tomorrow.',
+              'Board complete!',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
@@ -190,14 +271,20 @@ class _WordLoopBody extends ConsumerWidget {
 }
 
 class _ResultSheet extends ConsumerWidget {
-  const _ResultSheet({required this.state, required this.dayIndex});
+  const _ResultSheet({
+    required this.state,
+    required this.dayIndex,
+    required this.difficulty,
+  });
 
   final WordLoopGameState state;
   final int dayIndex;
+  final WordLoopDifficulty difficulty;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statsAsync = ref.watch(wordLoopStatsProvider);
+    final freePlayAsync = ref.watch(wordLoopFreePlayStatsProvider);
     final par = state.puzzle.par;
     final used = state.wordsUsed;
 
@@ -230,7 +317,10 @@ class _ResultSheet extends ConsumerWidget {
             data: (stats) {
               final current =
                   StreakCalculator.current(stats.solvedDayIndices, dayIndex);
-              final longest = StreakCalculator.longest(stats.solvedDayIndices);
+              final tier = freePlayAsync.maybeWhen(
+                data: (fp) => fp.forDifficulty(difficulty.name),
+                orElse: () => null,
+              );
               return Row(
                 children: [
                   _StatChip(
@@ -240,14 +330,16 @@ class _ResultSheet extends ConsumerWidget {
                   ),
                   const SizedBox(width: 12),
                   _StatChip(
-                    label: 'Best',
-                    value: '$longest',
-                    icon: Icons.emoji_events_outlined,
+                    label: 'Solved',
+                    value: tier == null ? '—' : '${tier.solved}',
+                    icon: Icons.check_circle_outline,
                   ),
                   const SizedBox(width: 12),
                   _StatChip(
                     label: 'Fewest',
-                    value: '${stats.bestWordCount ?? used}',
+                    value: tier?.bestSeconds == null
+                        ? '$used'
+                        : '${tier!.bestSeconds}',
                     icon: Icons.short_text_rounded,
                   ),
                 ],
@@ -255,23 +347,53 @@ class _ResultSheet extends ConsumerWidget {
             },
           ),
           const SizedBox(height: 20),
-          FilledButton.icon(
-            onPressed: () {
-              ShareCard.share(
-                ShareCard.buildSummaryResultText(
-                  appName: 'Allways Games',
-                  gameName: 'Word Loop',
-                  dayIndex: dayIndex,
-                  score: '$used/$par',
-                  // The words themselves are deliberately left out: this is
-                  // the same board everyone plays today, and a share card
-                  // that spoils it is a share card nobody can post.
-                  lines: ['Covered all 12 letters'],
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    ref
+                        .read(wordLoopGameControllerProvider.notifier)
+                        .selectDifficulty(difficulty);
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Play another'),
                 ),
-              );
-            },
-            icon: const Icon(Icons.share_outlined),
-            label: const Text('Share result'),
+              ),
+              const SizedBox(width: 10),
+              OutlinedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  ref
+                      .read(wordLoopGameControllerProvider.notifier)
+                      .changeDifficulty();
+                },
+                child: const Text('Change difficulty'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton.icon(
+              onPressed: () {
+                ShareCard.share(
+                  ShareCard.buildSummaryResultText(
+                    appName: 'Allways Games',
+                    gameName: 'Word Loop',
+                    dayIndex: dayIndex,
+                    score: '$used/$par',
+                    // The words themselves are deliberately left out: a
+                    // share card that spoils this exact board for a friend
+                    // who's about to play it is one nobody can post.
+                    lines: ['${difficulty.label} · covered all 12 letters'],
+                  ),
+                );
+              },
+              icon: const Icon(Icons.share_outlined, size: 18),
+              label: const Text('Share result'),
+            ),
           ),
         ],
       ),

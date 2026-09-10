@@ -5,10 +5,33 @@ import '../../../app/theme/colors.dart';
 import '../../../core/daily_seed/daily_seed.dart';
 import '../../../core/persistence/streak.dart';
 import '../../../shared_game_kit/clock/puzzle_clock.dart';
+import '../../../shared_game_kit/difficulty/difficulty_picker.dart';
 import '../../../shared_game_kit/share_card/share_card.dart';
+import '../domain/tile_layout.dart';
 import '../domain/tile_match_game_state.dart';
 import 'tile_match_providers.dart';
 import 'widgets/tile_match_board.dart';
+
+const List<DifficultyOption<String>> _difficultyOptions = [
+  DifficultyOption(
+    value: 'Long Hall',
+    label: 'Easy',
+    description: '78 tiles, a gentle start',
+    icon: Icons.sentiment_satisfied_outlined,
+  ),
+  DifficultyOption(
+    value: 'Spire',
+    label: 'Medium',
+    description: '82 tiles, more to track',
+    icon: Icons.sentiment_neutral_outlined,
+  ),
+  DifficultyOption(
+    value: 'Terrace',
+    label: 'Hard',
+    description: '88 tiles, nowhere to hide',
+    icon: Icons.local_fire_department_outlined,
+  ),
+];
 
 class TileMatchScreen extends ConsumerWidget {
   const TileMatchScreen({super.key});
@@ -25,17 +48,39 @@ class TileMatchScreen extends ConsumerWidget {
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Tile Match')),
+      appBar: AppBar(
+        title: const Text('Tile Match'),
+        actions: [
+          asyncState.maybeWhen(
+            data: (state) => state == null
+                ? const SizedBox.shrink()
+                : IconButton(
+                    tooltip: 'Change difficulty',
+                    icon: const Icon(Icons.tune),
+                    onPressed: () => ref
+                        .read(tileMatchGameControllerProvider.notifier)
+                        .changeDifficulty(),
+                  ),
+            orElse: () => const SizedBox.shrink(),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: asyncState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, _) => Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
-              child: Text("Could not load today's board: $err"),
+              child: Text('Could not load Tile Match: $err'),
             ),
           ),
-          data: (state) => _TileMatchBody(state: state),
+          data: (state) => state == null
+              ? _DifficultyPickerBody(
+                  onSelect: (layout) => ref
+                      .read(tileMatchGameControllerProvider.notifier)
+                      .selectDifficulty(layout),
+                )
+              : _TileMatchBody(state: state),
         ),
       ),
     );
@@ -50,6 +95,31 @@ class TileMatchScreen extends ConsumerWidget {
       ),
       builder: (_) =>
           _ResultSheet(state: state, dayIndex: DailySeed.todayIndex()),
+    );
+  }
+}
+
+class _DifficultyPickerBody extends ConsumerWidget {
+  const _DifficultyPickerBody({required this.onSelect});
+
+  final ValueChanged<String> onSelect;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final freePlay = ref.watch(tileMatchFreePlayStatsProvider);
+    final solvedCounts = freePlay.maybeWhen(
+      data: (stats) => {
+        for (final layout in tileMatchDifficultyTiers)
+          layout: stats.forDifficulty(layout).solved,
+      },
+      orElse: () => const <String, int>{},
+    );
+
+    return DifficultyPicker<String>(
+      title: 'Choose a board size',
+      options: _difficultyOptions,
+      solvedCounts: solvedCounts,
+      onSelect: onSelect,
     );
   }
 }
@@ -71,7 +141,8 @@ class _TileMatchBody extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${state.puzzle.layout.name} · ${state.remaining.length} left',
+                '${tileMatchDifficultyLabel(state.puzzle.layout.name)} · '
+                '${state.remaining.length} left',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               Text(
@@ -96,13 +167,11 @@ class _TileMatchBody extends ConsumerWidget {
             ),
           ),
         ),
-        if (state.status == TileMatchStatus.stuck || state.locked)
+        if (state.status == TileMatchStatus.stuck)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: Text(
-              state.locked
-                  ? "Today's board ran dry. Come back tomorrow for a new one."
-                  : 'No matching pair is free. Undo a move, or come back tomorrow.',
+              'No matching pair is free. Undo a move, or try another board.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
@@ -111,7 +180,7 @@ class _TileMatchBody extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: Text(
-              'Board cleared. A new one arrives tomorrow.',
+              'Board cleared!',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
@@ -122,7 +191,7 @@ class _TileMatchBody extends ConsumerWidget {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: (!state.locked && state.canUndo) ? controller.undo : null,
+                  onPressed: state.canUndo ? controller.undo : null,
                   icon: const Icon(Icons.undo_rounded, size: 18),
                   label: const Text('Undo'),
                 ),
@@ -130,7 +199,7 @@ class _TileMatchBody extends ConsumerWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton.icon(
-                  onPressed: (!state.locked && state.isPlaying) ? controller.hint : null,
+                  onPressed: state.isPlaying ? controller.hint : null,
                   icon: const Icon(Icons.lightbulb_outline_rounded, size: 18),
                   label: const Text('Hint'),
                 ),
@@ -152,6 +221,8 @@ class _ResultSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statsAsync = ref.watch(tileMatchStatsProvider);
+    final freePlayAsync = ref.watch(tileMatchFreePlayStatsProvider);
+    final layoutName = state.puzzle.layout.name;
     final cleared = state.status == TileMatchStatus.cleared;
 
     return Padding(
@@ -167,7 +238,8 @@ class _ResultSheet extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             cleared
-                ? 'Every tile gone in ${formatPuzzleClock(state.elapsedSeconds)}.'
+                ? '${tileMatchDifficultyLabel(layoutName)} in '
+                    '${formatPuzzleClock(state.elapsedSeconds)}.'
                 : '${state.tilesCleared} of ${state.puzzle.tileCount} tiles '
                     'cleared before the board ran dry.',
             style: Theme.of(context).textTheme.bodyLarge,
@@ -189,7 +261,10 @@ class _ResultSheet extends ConsumerWidget {
             data: (stats) {
               final current =
                   StreakCalculator.current(stats.clearedDayIndices, dayIndex);
-              final longest = StreakCalculator.longest(stats.clearedDayIndices);
+              final tier = freePlayAsync.maybeWhen(
+                data: (fp) => fp.forDifficulty(layoutName),
+                orElse: () => null,
+              );
               return Row(
                 children: [
                   _StatChip(
@@ -199,16 +274,16 @@ class _ResultSheet extends ConsumerWidget {
                   ),
                   const SizedBox(width: 12),
                   _StatChip(
-                    label: 'Best',
-                    value: '$longest',
-                    icon: Icons.emoji_events_outlined,
+                    label: 'Solved',
+                    value: tier == null ? '—' : '${tier.solved}',
+                    icon: Icons.check_circle_outline,
                   ),
                   const SizedBox(width: 12),
                   _StatChip(
-                    label: 'Fastest',
-                    value: stats.bestSeconds == null
+                    label: 'Best',
+                    value: tier?.bestSeconds == null
                         ? '—'
-                        : formatPuzzleClock(stats.bestSeconds!),
+                        : formatPuzzleClock(tier!.bestSeconds!),
                     icon: Icons.timer_outlined,
                   ),
                 ],
@@ -216,22 +291,52 @@ class _ResultSheet extends ConsumerWidget {
             },
           ),
           const SizedBox(height: 20),
-          FilledButton.icon(
-            onPressed: () {
-              ShareCard.share(
-                ShareCard.buildSummaryResultText(
-                  appName: 'Allways Games',
-                  gameName: 'Tile Match',
-                  dayIndex: dayIndex,
-                  score: cleared
-                      ? formatPuzzleClock(state.elapsedSeconds)
-                      : '${state.tilesCleared}/${state.puzzle.tileCount}',
-                  lines: [state.puzzle.layout.name],
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    ref
+                        .read(tileMatchGameControllerProvider.notifier)
+                        .selectDifficulty(layoutName);
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Play another'),
                 ),
-              );
-            },
-            icon: const Icon(Icons.share_outlined),
-            label: const Text('Share result'),
+              ),
+              const SizedBox(width: 10),
+              OutlinedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  ref
+                      .read(tileMatchGameControllerProvider.notifier)
+                      .changeDifficulty();
+                },
+                child: const Text('Change difficulty'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton.icon(
+              onPressed: () {
+                ShareCard.share(
+                  ShareCard.buildSummaryResultText(
+                    appName: 'Allways Games',
+                    gameName: 'Tile Match',
+                    dayIndex: dayIndex,
+                    score: cleared
+                        ? formatPuzzleClock(state.elapsedSeconds)
+                        : '${state.tilesCleared}/${state.puzzle.tileCount}',
+                    lines: [tileMatchDifficultyLabel(layoutName)],
+                  ),
+                );
+              },
+              icon: const Icon(Icons.share_outlined, size: 18),
+              label: const Text('Share result'),
+            ),
           ),
         ],
       ),

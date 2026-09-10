@@ -5,6 +5,7 @@ import '../../../app/theme/colors.dart';
 import '../../../core/daily_seed/daily_seed.dart';
 import '../../../core/persistence/streak.dart';
 import '../../../shared_game_kit/clock/puzzle_clock.dart';
+import '../../../shared_game_kit/difficulty/difficulty_picker.dart';
 import '../../../shared_game_kit/keyboard/on_screen_keyboard.dart';
 import '../../../shared_game_kit/share_card/share_card.dart';
 import '../domain/crossword_game_state.dart';
@@ -12,6 +13,21 @@ import '../domain/crossword_grid.dart';
 import '../domain/crossword_puzzle.dart';
 import 'crossword_providers.dart';
 import 'widgets/crossword_board.dart';
+
+const List<DifficultyOption<CrosswordDifficulty>> _difficultyOptions = [
+  DifficultyOption(
+    value: CrosswordDifficulty.easy,
+    label: 'Easy',
+    description: 'More black squares, fewer to fill',
+    icon: Icons.sentiment_satisfied_outlined,
+  ),
+  DifficultyOption(
+    value: CrosswordDifficulty.hard,
+    label: 'Hard',
+    description: 'A more open grid, more to fill',
+    icon: Icons.local_fire_department_outlined,
+  ),
+];
 
 class CrosswordScreen extends ConsumerStatefulWidget {
   const CrosswordScreen({super.key});
@@ -32,13 +48,17 @@ class _CrosswordScreenState extends ConsumerState<CrosswordScreen> {
       final value = next.valueOrNull;
       if (value == null) return;
       if (wasPlaying && value.status == CrosswordStatus.solved) {
+        final difficulty = ref
+                .read(crosswordGameControllerProvider.notifier)
+                .currentDifficulty ??
+            CrosswordDifficulty.easy;
         showModalBottomSheet(
           context: context,
           backgroundColor: AppColors.background,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
-          builder: (_) => _ResultSheet(state: value),
+          builder: (_) => _ResultSheet(state: value, difficulty: difficulty),
         );
       }
     });
@@ -48,15 +68,29 @@ class _CrosswordScreenState extends ConsumerState<CrosswordScreen> {
         title: const Text('Crossword'),
         actions: [
           asyncState.maybeWhen(
-            data: (state) => Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: Center(
-                child: Text(
-                  formatPuzzleClock(state.elapsedSeconds),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-            ),
+            data: (state) => state == null
+                ? const SizedBox.shrink()
+                : Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: Center(
+                      child: Text(
+                        formatPuzzleClock(state.elapsedSeconds),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                  ),
+            orElse: () => const SizedBox.shrink(),
+          ),
+          asyncState.maybeWhen(
+            data: (state) => state == null
+                ? const SizedBox.shrink()
+                : IconButton(
+                    tooltip: 'Change difficulty',
+                    icon: const Icon(Icons.tune),
+                    onPressed: () => ref
+                        .read(crosswordGameControllerProvider.notifier)
+                        .changeDifficulty(),
+                  ),
             orElse: () => const SizedBox.shrink(),
           ),
         ],
@@ -64,16 +98,46 @@ class _CrosswordScreenState extends ConsumerState<CrosswordScreen> {
       body: SafeArea(
         child: asyncState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) =>
-              Center(child: Text("Could not load today's puzzle: $err")),
-          data: (state) => _Body(
-            state: state,
-            showMistakes: _showMistakes,
-            onToggleMistakes: () =>
-                setState(() => _showMistakes = !_showMistakes),
-          ),
+          error: (err, _) => Center(child: Text('Could not load Crossword: $err')),
+          data: (state) => state == null
+              ? _DifficultyPickerBody(
+                  onSelect: (d) => ref
+                      .read(crosswordGameControllerProvider.notifier)
+                      .selectDifficulty(d),
+                )
+              : _Body(
+                  state: state,
+                  showMistakes: _showMistakes,
+                  onToggleMistakes: () =>
+                      setState(() => _showMistakes = !_showMistakes),
+                ),
         ),
       ),
+    );
+  }
+}
+
+class _DifficultyPickerBody extends ConsumerWidget {
+  const _DifficultyPickerBody({required this.onSelect});
+
+  final ValueChanged<CrosswordDifficulty> onSelect;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final freePlay = ref.watch(crosswordFreePlayStatsProvider);
+    final solvedCounts = freePlay.maybeWhen(
+      data: (stats) => {
+        for (final d in CrosswordDifficulty.values)
+          d: stats.forDifficulty(d.name).solved,
+      },
+      orElse: () => const <CrosswordDifficulty, int>{},
+    );
+
+    return DifficultyPicker<CrosswordDifficulty>(
+      title: 'Choose a difficulty',
+      options: _difficultyOptions,
+      solvedCounts: solvedCounts,
+      onSelect: onSelect,
     );
   }
 }
@@ -302,13 +366,15 @@ class _ClueColumn extends StatelessWidget {
 }
 
 class _ResultSheet extends ConsumerWidget {
-  const _ResultSheet({required this.state});
+  const _ResultSheet({required this.state, required this.difficulty});
 
   final CrosswordGameState state;
+  final CrosswordDifficulty difficulty;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statsAsync = ref.watch(crosswordStatsProvider);
+    final freePlayAsync = ref.watch(crosswordFreePlayStatsProvider);
     final dayIndex = DailySeed.todayIndex();
     final revealed = state.revealedCells.length;
 
@@ -322,9 +388,9 @@ class _ResultSheet extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             revealed == 0
-                ? 'Finished in ${formatPuzzleClock(state.elapsedSeconds)}, '
+                ? '${difficulty.label} in ${formatPuzzleClock(state.elapsedSeconds)}, '
                     'unaided.'
-                : 'Finished in ${formatPuzzleClock(state.elapsedSeconds)}, '
+                : '${difficulty.label} in ${formatPuzzleClock(state.elapsedSeconds)}, '
                     'with $revealed letter${revealed == 1 ? '' : 's'} revealed.',
             style: Theme.of(context).textTheme.bodyLarge,
           ),
@@ -335,7 +401,10 @@ class _ResultSheet extends ConsumerWidget {
             data: (stats) {
               final current =
                   StreakCalculator.current(stats.wonDayIndices, dayIndex);
-              final longest = StreakCalculator.longest(stats.wonDayIndices);
+              final tier = freePlayAsync.maybeWhen(
+                data: (fp) => fp.forDifficulty(difficulty.name),
+                orElse: () => null,
+              );
               return Row(
                 children: [
                   _StatChip(
@@ -345,16 +414,16 @@ class _ResultSheet extends ConsumerWidget {
                   ),
                   const SizedBox(width: 12),
                   _StatChip(
-                    label: 'Best',
-                    value: '$longest',
-                    icon: Icons.emoji_events_outlined,
+                    label: 'Solved',
+                    value: tier == null ? '—' : '${tier.solved}',
+                    icon: Icons.check_circle_outline,
                   ),
                   const SizedBox(width: 12),
                   _StatChip(
                     label: 'Fastest',
-                    value: stats.bestSeconds == null
+                    value: tier?.bestSeconds == null
                         ? '—'
-                        : formatPuzzleClock(stats.bestSeconds!),
+                        : formatPuzzleClock(tier!.bestSeconds!),
                     icon: Icons.timer_outlined,
                   ),
                 ],
@@ -362,23 +431,51 @@ class _ResultSheet extends ConsumerWidget {
             },
           ),
           const SizedBox(height: 20),
-          FilledButton.icon(
-            onPressed: () => ShareCard.share(
-              ShareCard.buildSummaryResultText(
-                appName: 'Allways Games',
-                gameName: 'Crossword',
-                dayIndex: dayIndex,
-                score: formatPuzzleClock(state.elapsedSeconds),
-                lines: [
-                  if (revealed == 0)
-                    'No letters revealed'
-                  else
-                    '$revealed revealed',
-                ],
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    ref
+                        .read(crosswordGameControllerProvider.notifier)
+                        .selectDifficulty(difficulty);
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Play another'),
+                ),
               ),
+              const SizedBox(width: 10),
+              OutlinedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  ref
+                      .read(crosswordGameControllerProvider.notifier)
+                      .changeDifficulty();
+                },
+                child: const Text('Change difficulty'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton.icon(
+              onPressed: () => ShareCard.share(
+                ShareCard.buildSummaryResultText(
+                  appName: 'Allways Games',
+                  gameName: 'Crossword',
+                  dayIndex: dayIndex,
+                  score: formatPuzzleClock(state.elapsedSeconds),
+                  lines: [
+                    difficulty.label,
+                    if (revealed == 0) 'No letters revealed' else '$revealed revealed',
+                  ],
+                ),
+              ),
+              icon: const Icon(Icons.share_outlined, size: 18),
+              label: const Text('Share result'),
             ),
-            icon: const Icon(Icons.share_outlined),
-            label: const Text('Share result'),
           ),
         ],
       ),

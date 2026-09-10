@@ -2,7 +2,6 @@ import 'package:isar_community/isar.dart';
 
 import '../../../core/persistence/puzzle_completion.dart';
 import '../domain/honeycomb_scoring.dart';
-import 'honeycomb_progress.dart';
 
 const String honeycombGameId = 'honeycomb';
 
@@ -35,58 +34,54 @@ class HoneycombGameStats {
   int get totalGoals => goalDayIndices.length;
 }
 
-/// Stores which words a player has found on each day's board, and mirrors
-/// the day's outcome into the shared completion history for streaks.
+/// Mirrors a Honeycomb session's outcome into the shared completion
+/// history, for streaks and cross-day stats.
+///
+/// Free play draws a fresh random board every time the player starts one,
+/// so unlike the old daily-lock version there is no single "today's board"
+/// to persist and resume — a board in progress lives only in memory for
+/// that session, same as every other free-play game in the app.
 class HoneycombRepository {
   HoneycombRepository(this._isar);
 
   final Isar _isar;
 
-  Future<Set<String>> foundWordsForDay(int dayIndex) async {
-    final progress = await _isar.honeycombProgress
-        .filter()
-        .dayIndexEqualTo(dayIndex)
-        .findFirst();
-    return progress?.foundWords.toSet() ?? <String>{};
-  }
-
-  /// Saves the day's found words and updates its completion record.
-  ///
-  /// Called after every accepted word, so a player who closes the app mid
-  /// board loses nothing.
-  Future<void> saveProgress({
+  /// Records the day's outcome so far. Called after every accepted word:
+  /// if this session's score reaches the daily goal rank, that is recorded
+  /// immediately rather than waiting for the player to stop.
+  Future<void> recordSession({
     required int dayIndex,
-    required Set<String> foundWords,
     required int score,
     required int maxScore,
   }) async {
-    final progress = HoneycombProgress()
-      ..dayIndex = dayIndex
-      ..foundWords = foundWords.toList()
-      ..updatedAt = DateTime.now();
-
     final reachedGoal =
         score >= honeycombScoreForRank(honeycombDailyGoalRank, maxScore);
-
+    // A day already marked as having reached the goal stays marked, even
+    // if this particular session's score is lower — the player earned that
+    // once today already.
     final existing = await _isar.puzzleCompletions
         .filter()
         .gameIdEqualTo(honeycombGameId)
         .dayIndexEqualTo(dayIndex)
         .findFirst();
+    final bestScoreToday = existing?.guessesUsed;
+    final won = reachedGoal || (existing?.won ?? false);
+    final scoreToStore = bestScoreToday == null
+        ? score
+        : (score > bestScoreToday ? score : bestScoreToday);
+
     final completion = PuzzleCompletion()
       ..id = existing?.id ?? Isar.autoIncrement
       ..gameId = honeycombGameId
       ..dayIndex = dayIndex
-      // "Won" here means the day's goal rank was reached, not that every
-      // word was found — on most boards nobody finds every word.
-      ..won = reachedGoal
-      ..guessesUsed = score
+      // "Won" here means the day's goal rank was reached at some point
+      // today, not that every word was found — on most boards nobody
+      // finds every word.
+      ..won = won
+      ..guessesUsed = scoreToStore
       ..completedAt = DateTime.now();
 
-    await _isar.writeTxn(() async {
-      await _isar.honeycombProgress.put(progress);
-      await _isar.puzzleCompletions.put(completion);
-    });
+    await _isar.writeTxn(() => _isar.puzzleCompletions.put(completion));
   }
 
   Future<HoneycombGameStats> loadStats() async {

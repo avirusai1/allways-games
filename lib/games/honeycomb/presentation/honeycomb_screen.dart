@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/daily_seed/daily_seed.dart';
 import '../../../core/persistence/streak.dart';
+import '../../../shared_game_kit/difficulty/difficulty_picker.dart';
 import '../../../shared_game_kit/share_card/share_card.dart';
 import '../domain/honeycomb_game_state.dart';
+import '../domain/honeycomb_puzzle.dart';
 import '../domain/honeycomb_scoring.dart';
 import 'honeycomb_providers.dart';
 import 'widgets/honeycomb_cells.dart';
@@ -22,6 +24,27 @@ String honeycombRejectionMessage(HoneycombRejection rejection) {
   };
 }
 
+const List<DifficultyOption<HoneycombDifficulty>> _difficultyOptions = [
+  DifficultyOption(
+    value: HoneycombDifficulty.easy,
+    label: 'Easy',
+    description: 'A generous comb, plenty of words',
+    icon: Icons.sentiment_satisfied_outlined,
+  ),
+  DifficultyOption(
+    value: HoneycombDifficulty.medium,
+    label: 'Medium',
+    description: 'A fair number of words to find',
+    icon: Icons.sentiment_neutral_outlined,
+  ),
+  DifficultyOption(
+    value: HoneycombDifficulty.hard,
+    label: 'Hard',
+    description: 'A tight letter set, slim pickings',
+    icon: Icons.local_fire_department_outlined,
+  ),
+];
+
 class HoneycombScreen extends ConsumerWidget {
   const HoneycombScreen({super.key});
 
@@ -33,12 +56,27 @@ class HoneycombScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Honeycomb'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.bar_chart_rounded),
-            tooltip: 'Progress',
-            onPressed: asyncState.valueOrNull == null
-                ? null
-                : () => _showProgressSheet(context, asyncState.value!),
+          asyncState.maybeWhen(
+            data: (state) => state == null
+                ? const SizedBox.shrink()
+                : IconButton(
+                    icon: const Icon(Icons.bar_chart_rounded),
+                    tooltip: 'Progress',
+                    onPressed: () => _showProgressSheet(context, state),
+                  ),
+            orElse: () => const SizedBox.shrink(),
+          ),
+          asyncState.maybeWhen(
+            data: (state) => state == null
+                ? const SizedBox.shrink()
+                : IconButton(
+                    tooltip: 'Change difficulty',
+                    icon: const Icon(Icons.tune),
+                    onPressed: () => ref
+                        .read(honeycombGameControllerProvider.notifier)
+                        .changeDifficulty(),
+                  ),
+            orElse: () => const SizedBox.shrink(),
           ),
         ],
       ),
@@ -48,10 +86,16 @@ class HoneycombScreen extends ConsumerWidget {
           error: (err, _) => Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
-              child: Text("Could not load today's comb: $err"),
+              child: Text('Could not load Honeycomb: $err'),
             ),
           ),
-          data: (state) => _HoneycombBody(state: state),
+          data: (state) => state == null
+              ? _DifficultyPickerBody(
+                  onSelect: (d) => ref
+                      .read(honeycombGameControllerProvider.notifier)
+                      .selectDifficulty(d),
+                )
+              : _HoneycombBody(state: state),
         ),
       ),
     );
@@ -66,6 +110,31 @@ class HoneycombScreen extends ConsumerWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (_) => _ProgressSheet(state: state, dayIndex: DailySeed.todayIndex()),
+    );
+  }
+}
+
+class _DifficultyPickerBody extends ConsumerWidget {
+  const _DifficultyPickerBody({required this.onSelect});
+
+  final ValueChanged<HoneycombDifficulty> onSelect;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final freePlay = ref.watch(honeycombFreePlayStatsProvider);
+    final solvedCounts = freePlay.maybeWhen(
+      data: (stats) => {
+        for (final d in HoneycombDifficulty.values)
+          d: stats.forDifficulty(d.name).solved,
+      },
+      orElse: () => const <HoneycombDifficulty, int>{},
+    );
+
+    return DifficultyPicker<HoneycombDifficulty>(
+      title: 'Choose a difficulty',
+      options: _difficultyOptions,
+      solvedCounts: solvedCounts,
+      onSelect: onSelect,
     );
   }
 }
@@ -156,6 +225,24 @@ class _HoneycombBody extends ConsumerWidget {
             ],
           ),
         ),
+        if (state.isComplete)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: FilledButton.icon(
+              onPressed: () {
+                final difficulty = ref
+                    .read(honeycombGameControllerProvider.notifier)
+                    .currentDifficulty;
+                if (difficulty != null) {
+                  ref
+                      .read(honeycombGameControllerProvider.notifier)
+                      .selectDifficulty(difficulty);
+                }
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text('Every word found — play another'),
+            ),
+          ),
         const Spacer(),
       ],
     );
@@ -225,6 +312,10 @@ class _ProgressSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statsAsync = ref.watch(honeycombStatsProvider);
+    final freePlayAsync = ref.watch(honeycombFreePlayStatsProvider);
+    final difficulty = ref
+        .read(honeycombGameControllerProvider.notifier)
+        .currentDifficulty;
 
     return SafeArea(
       child: Padding(
@@ -273,7 +364,12 @@ class _ProgressSheet extends ConsumerWidget {
               data: (stats) {
                 final current =
                     StreakCalculator.current(stats.goalDayIndices, dayIndex);
-                final longest = StreakCalculator.longest(stats.goalDayIndices);
+                final tier = difficulty == null
+                    ? null
+                    : freePlayAsync.maybeWhen(
+                        data: (fp) => fp.forDifficulty(difficulty.name),
+                        orElse: () => null,
+                      );
                 return Row(
                   children: [
                     _StatChip(
@@ -283,9 +379,9 @@ class _ProgressSheet extends ConsumerWidget {
                     ),
                     const SizedBox(width: 12),
                     _StatChip(
-                      label: 'Best',
-                      value: '$longest',
-                      icon: Icons.emoji_events_outlined,
+                      label: 'Combs won',
+                      value: tier == null ? '—' : '${tier.solved}',
+                      icon: Icons.check_circle_outline,
                     ),
                     const SizedBox(width: 12),
                     _StatChip(
@@ -298,26 +394,59 @@ class _ProgressSheet extends ConsumerWidget {
               },
             ),
             const SizedBox(height: 20),
-            FilledButton.icon(
-              onPressed: () {
-                ShareCard.share(
-                  ShareCard.buildSummaryResultText(
-                    appName: 'Allways Games',
-                    gameName: 'Honeycomb',
-                    dayIndex: dayIndex,
-                    score: state.rank.name,
-                    // Words are left out on purpose: everyone plays the
-                    // same comb today, and a card that lists answers is a
-                    // card nobody can post.
-                    lines: [
-                      '${state.score} pts · ${state.foundWords.length} words'
-                          '${state.foundPangrams.isEmpty ? '' : ' · pangram!'}',
-                    ],
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: difficulty == null
+                        ? null
+                        : () {
+                            Navigator.of(context).pop();
+                            ref
+                                .read(honeycombGameControllerProvider.notifier)
+                                .selectDifficulty(difficulty);
+                          },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('New board'),
                   ),
-                );
-              },
-              icon: const Icon(Icons.share_outlined),
-              label: const Text('Share progress'),
+                ),
+                const SizedBox(width: 10),
+                OutlinedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    ref
+                        .read(honeycombGameControllerProvider.notifier)
+                        .changeDifficulty();
+                  },
+                  child: const Text('Change difficulty'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton.icon(
+                onPressed: () {
+                  ShareCard.share(
+                    ShareCard.buildSummaryResultText(
+                      appName: 'Allways Games',
+                      gameName: 'Honeycomb',
+                      dayIndex: dayIndex,
+                      score: state.rank.name,
+                      // Words are left out on purpose: a card that lists
+                      // answers is a card nobody who hasn't played this
+                      // exact board can enjoy.
+                      lines: [
+                        '${difficulty?.label ?? ''} · ${state.score} pts · '
+                                '${state.foundWords.length} words'
+                            '${state.foundPangrams.isEmpty ? '' : ' · pangram!'}',
+                      ],
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.share_outlined, size: 18),
+                label: const Text('Share progress'),
+              ),
             ),
           ],
         ),

@@ -43,7 +43,17 @@ class GroupsScreen extends ConsumerWidget {
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Groups')),
+      appBar: AppBar(
+        title: const Text('Groups'),
+        actions: [
+          IconButton(
+            tooltip: 'New puzzle',
+            icon: const Icon(Icons.refresh),
+            onPressed: () =>
+                ref.read(groupsGameControllerProvider.notifier).newPuzzle(),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: asyncState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -321,8 +331,7 @@ class _ResultSheet extends ConsumerWidget {
             solved
                 ? 'All four groups with ${state.mistakes} '
                     '${state.mistakes == 1 ? 'mistake' : 'mistakes'}.'
-                : 'The answers are on the board. A new puzzle arrives '
-                    'tomorrow.',
+                : 'The answers are on the board.',
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 16),
@@ -359,24 +368,36 @@ class _ResultSheet extends ConsumerWidget {
           const SizedBox(height: 20),
           FilledButton.icon(
             onPressed: () {
-              ShareCard.share(
-                ShareCard.buildSummaryResultText(
-                  appName: 'Allways Games',
-                  gameName: 'Groups',
-                  dayIndex: dayIndex,
-                  score: solved
-                      ? '${state.mistakes}/$groupsMistakeLimit'
-                      : 'X/$groupsMistakeLimit',
-                  // The category names would give the whole puzzle away, so
-                  // the card carries the score alone.
-                  lines: [
-                    '${state.solvedTags.length}/$groupsCategoryCount groups',
-                  ],
-                ),
-              );
+              Navigator.of(context).pop();
+              ref.read(groupsGameControllerProvider.notifier).newPuzzle();
             },
-            icon: const Icon(Icons.share_outlined),
-            label: const Text('Share result'),
+            icon: const Icon(Icons.refresh),
+            label: const Text('Play another'),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton.icon(
+              onPressed: () {
+                ShareCard.share(
+                  ShareCard.buildSummaryResultText(
+                    appName: 'Allways Games',
+                    gameName: 'Groups',
+                    dayIndex: dayIndex,
+                    score: solved
+                        ? '${state.mistakes}/$groupsMistakeLimit'
+                        : 'X/$groupsMistakeLimit',
+                    // The category names would give the whole puzzle away,
+                    // so the card carries the score alone.
+                    lines: [
+                      '${state.solvedTags.length}/$groupsCategoryCount groups',
+                    ],
+                  ),
+                );
+              },
+              icon: const Icon(Icons.share_outlined, size: 18),
+              label: const Text('Share result'),
+            ),
           ),
         ],
       ),
