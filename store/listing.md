@@ -110,6 +110,20 @@ the status bar, nav bar, and ad banner). Final assets in
 
 No "Test Ad" banner appears in any of them.
 
+## Tablet screenshots — captured
+
+Play Console has separate 7-inch and 10-inch tablet screenshot slots.
+Taken on emulated tablet AVDs (7" WSVGA and 10.1" WXGA, portrait, Android
+15) since no physical tablet was available, cropped to remove the gesture
+bar and ad banner. In `store/screenshots/tablet7/` and `.../tablet10/`:
+
+- `01_hub.png` — hub screen
+- `02_*` / `03_*` — one difficulty picker and one gameplay screen per size
+  (Sudoku on the 7", Groups and Weave on the 10")
+
+The layout is fully responsive at both sizes — nothing tablet-specific was
+built, and none was needed.
+
 ## Feature graphic — done
 
 `store/screenshots/feature_graphic.png`, 1024×500, built from the app's
